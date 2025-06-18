@@ -4,8 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="global.css" />
 </head>
 <body>
-    
+    <header>
+        <nav class="navbar">
+            <div class="logo-wrapper">
+               <!-- <img src="assets/barbell-icon.png" alt="Barbell Icon" class="logo-img" width=100 height=100 />--> 
+                <h1>❚█══█❚</h1>
+            </div>
+            <div class="page-header">
+                <h1>GYM PROGRESS VISUALIZER</h1>
+            </div>
+            <div class="theme-button">
+                <button type="button"><img src="assets/white-moon.png" alt="moon" class="moon-img" width=20 height=20 /></button>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="main-container">
+            <div class="welcome">
+                <h1>Welcome!</h1>
+            </div>
+            <section class="statistics">
+                <div class="statistics-cards">
+                    <div class="statistics-card">
+                        <h3>Workouts Logged</h3>
+                        <p>🏋️ 1</p>
+                    </div>
+                    <div class="statistics-card">
+                        <h3>All-Time PRs</h3>
+                        <ul class="lifts">
+                            <li>Bench: 225 lbs</li>
+                            <li>Squat: 315 lbs</li>
+                            <li>Deadlift: 365 lbs</li>
+                            <li>OHP: 165 lbs</li>
+                        </ul>
+                    </div>
+                    <div class="statistics-card">
+                        <h3>This Week's Volume</h3>
+                        <p>7,000 lbs</p>
+                    </div>
+                </div>
+                <div class="statistics-cards workout-cards">
+                    <div class="statistics-card">
+                        <div class="add-workout-form">
+                            <form action="#" method="post">
+                                <h3>Add Workout</h3>
+                                <p>
+                                    <input type="date" id="workout-date" name="workout-date" />
+                                </p>
+                                <p>
+                                    <input type="text" value="Exercise" valid="workout-exercise" name="workout-exercise" />
+                                </p>
+                                <p>
+                                    <input type="number" id="workout-sets" name="workout-sets" />
+                                </p>
+                                <p>
+                                    <input type="number" id="workout-reps" name="workout-reps" />
+                                </p>
+                                <p>
+                                    <input type="number" id="workout-weight" name="workout-weight" />
+                                </p>
+                                <button type="submit">Add Workout</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="statistics-card">
+                        <h3>Records</h3>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
 </body>
 </html>

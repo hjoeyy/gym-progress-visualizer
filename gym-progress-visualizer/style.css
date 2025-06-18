@@ -1,0 +1,57 @@
+.navbar {
+    background-color: #2963a3;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 50px;
+    color: #ffffff;
+}
+
+.theme-button button {
+    background-color: #3c76c1;
+    border: 1px solid #2963a3;
+    border-radius: 100%;
+    padding: 10px;
+}
+
+.welcome {
+    padding: 30px 0 30px 130px;
+}
+/* Statistics */
+
+.statistics-cards {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.statistics-card {
+    border: 1px solid lightgray;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10%;
+}
+
+.statistics-card h3 {
+    font-weight: normal;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.statistics-card p {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.statistics-card li {
+    font-weight: bold;
+    list-style: none;
+    font-size: 24px;
+}
+
+.lifts {
+    padding: 20px;
+    margin: 0;
+}
