@@ -52,6 +52,49 @@
 }
 
 .lifts {
-    padding: 20px;
+    padding: 0 20px;
     margin: 0;
 }
+
+.workout-cards {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    flex-wrap: wrap;
+    padding: 20px 0;
+    gap: 20px;
+}
+
+.workout-cards .statistics-card {
+    flex: 0 1 calc(100% / 3 - 20px); /* 3 cards per row, minus gap */
+    max-width: calc(100% / 3 - 20px);
+}
+
+.add-workout-form {
+    padding: 0;
+    max-width: 100%;
+}
+
+form {
+    display: inline-block;
+    padding: 1em;
+}
+
+form p, form button, .smaller-stats input, .bigger-stats input, .exercises {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.bigger-stats {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.smaller-stats {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    padding-bottom: 10px;
+}
+

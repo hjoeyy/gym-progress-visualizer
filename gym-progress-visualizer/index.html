@@ -47,26 +47,37 @@
                         <p>7,000 lbs</p>
                     </div>
                 </div>
-                <div class="statistics-cards workout-cards">
+                <div class="workout-cards">
                     <div class="statistics-card">
                         <div class="add-workout-form">
                             <form action="#" method="post">
                                 <h3>Add Workout</h3>
-                                <p>
-                                    <input type="date" id="workout-date" name="workout-date" />
-                                </p>
-                                <p>
-                                    <input type="text" placeholder="Exercise" id="workout-exercise" name="workout-exercise" />
-                                </p>
-                                <p>
-                                    <input type="number" placeholder="Sets" id="workout-sets" name="workout-sets" />
-                                </p>
-                                <p>
-                                    <input type="number" placeholder="Reps" id="workout-reps" name="workout-reps" />
-                                </p>
-                                <p>
-                                    <input type="number" placeholder="Weight" id="workout-weight" name="workout-weight" />
-                                </p>
+                                <div class="bigger-stats">
+                                    <p>
+                                        <input type="date" id="workout-date" name="workout-date" />
+                                    </p>
+                                    <p>
+                                        <!--<input type="text" placeholder="Exercise" id="workout-exercise" name="workout-exercise" class="exercise"/>-->
+                                        <select name="exercise" id="workout-exercise" class="exercises">
+                                            <option value="">Exercise</option>
+                                            <option value="bench-press">Bench Press</option>
+                                            <option value="squat">Squat</option>
+                                            <option value="deadlift">Deadlift</option>
+                                            <option value="overhead-press">Overhead Press</option>
+                                        </select>
+                                    </p>
+                                </div>
+                                <div class="smaller-stats">
+                                    <p>
+                                        <input type="number" placeholder="Sets" id="workout-sets" name="workout-sets" />
+                                    </p>
+                                    <p>
+                                        <input type="number" placeholder="Reps" id="workout-reps" name="workout-reps" />
+                                    </p>
+                                    <p>
+                                        <input type="number" placeholder="Weight" id="workout-weight" name="workout-weight" />
+                                    </p>
+                                </div>
                                 <button type="submit">Add Workout</button>
                             </form>
                         </div>
