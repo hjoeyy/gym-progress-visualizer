@@ -54,12 +54,12 @@
                                 <h3>Add Workout</h3>
                                 <div class="bigger-stats">
                                     <p>
-                                        <input type="date" id="workout-date" name="workout-date" />
+                                        <input type="text" value="Date" class="date" id="workout-date" name="workout-date" />
                                     </p>
                                     <p>
                                         <!--<input type="text" placeholder="Exercise" id="workout-exercise" name="workout-exercise" class="exercise"/>-->
                                         <select name="exercise" id="workout-exercise" class="exercises">
-                                            <option value="">Exercise</option>
+                                            <option value="" class="placeholder">Exercise</option>
                                             <option value="bench-press">Bench Press</option>
                                             <option value="squat">Squat</option>
                                             <option value="deadlift">Deadlift</option>
@@ -84,6 +84,23 @@
                     </div>
                     <div class="statistics-card">
                         <h3>Records</h3>
+                        <p class="lighter-text">Bench Press <span>225 lbs x 5 reps (06/20/2025)</span></p>
+                        <div class="y-axis">
+                            <ul>
+                                <li>220</li>
+                                <li>200</li>
+                                <li>180</li>
+                            </ul>
+                        </div>
+                        <div class="x-axis">
+                            <ul>
+                                <li>06/02</li>
+                                <li>06/09</li>
+                                <li>06/16</li>
+                                <li>06/23</li>
+                                <li>06/30</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </section>

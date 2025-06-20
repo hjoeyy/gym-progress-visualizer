@@ -30,7 +30,8 @@
 .statistics-card {
     border: 1px solid lightgray;
     background-color: #ffffff;
-    padding: 20px;
+    padding: 10px;
+    padding-bottom: 0;
     border-radius: 10%;
 }
 
@@ -89,6 +90,13 @@ form p, form button, .smaller-stats input, .bigger-stats input, .exercises {
     display: flex;
     flex-direction: column;
     width: 100%;
+    gap: 5px;
+    padding-bottom: 5px;
+}
+
+.date {
+    color: gray;
+    padding-left: 10px;
 }
 
 .smaller-stats {
@@ -96,5 +104,64 @@ form p, form button, .smaller-stats input, .bigger-stats input, .exercises {
     width: 100%;
     gap: 10px;
     padding-bottom: 10px;
+}
+
+input, .exercises {
+    border: 1px solid lightgrey;
+    height: 30px;
+    padding-left: 10px;
+}
+
+.exercises {
+    color: gray;
+    height: 30px;
+    padding-left: 5px;
+}
+
+form button {
+    background-color: #3c76c1;
+    color: #ffffff;
+    border: 1px solid #2963a3;
+    height: 30px;
+    border-radius: 5px;
+}
+
+p.lighter-text {
+    font-size: 20px;
+}
+
+.statistics-card span {
+    font-weight: normal;
+}
+
+.y-axis ul {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: left;
+    align-items: start;
+    padding: 0;
+    padding-left: 10px;
+}
+
+.y-axis li {
+    font-weight: normal;
+    color: gray;
+    font-size: 12px;
+}
+
+.x-axis ul {
+    display: flex;
+    gap: 20px;
+    justify-content: left;
+    align-items: start;
+    padding: 0;
+    padding-left: 10px;
+}
+
+.x-axis li {
+    font-weight: normal;
+    color: gray;
+    font-size: 12px;
 }
 
