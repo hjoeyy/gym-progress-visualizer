@@ -32,8 +32,7 @@
 .statistics-card {
     border: 1px solid lightgray;
     background-color: #ffffff;
-    padding: 10px;
-    padding-bottom: 0;
+    padding: 20px;
     border-radius: 10%;
 }
 
@@ -175,7 +174,8 @@ p.lighter-text {
 }
 
 .workout-log-cards .statistics-card {
-    padding: 0;
+    padding: 20px 0;
+    padding-bottom: 10px;
 }
 
 table {
@@ -185,6 +185,8 @@ table {
 caption {
     font-weight: bold;
     text-align: start;
+    padding-left: 30px;
+    padding-bottom: 10px;
 }
 
 thead tr:first-child {
@@ -205,3 +207,49 @@ tr:last-child {
     border-bottom: none;
 }
 
+.statistics-card .summary-stats {
+    padding: 20px;
+}
+
+.summary-stats {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    gap: 20px;
+}
+
+.summary-stat {
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    gap: 10px;
+}
+
+.summary-stat p {
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.summary-stat img {
+    text-align: start;
+}
+
+.social-media-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 40px 0;
+}
+
+.footer-container {
+    background-color: #ffffff;
+    border-top: 1px solid lightgray;
+    padding: 40px;
+}
+
+.footer-container h3 {
+    text-align: center;
+    color: #2963a3;
+}
