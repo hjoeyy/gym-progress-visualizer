@@ -119,12 +119,13 @@ input, .exercises {
     padding-left: 5px;
 }
 
-form button {
+form .submit-button {
     background-color: #3c76c1;
     color: #ffffff;
     border: 1px solid #2963a3;
     height: 30px;
     border-radius: 5px;
+    width: 100%;
 }
 
 p.lighter-text {

@@ -50,7 +50,7 @@
                 <div class="workout-cards">
                     <div class="statistics-card">
                         <div class="add-workout-form">
-                            <form action="#" method="post">
+                            <form class="workout-form" action="#" method="post">
                                 <h3>Add Workout</h3>
                                 <div class="bigger-stats">
                                     <p>
@@ -78,7 +78,7 @@
                                         <input type="number" placeholder="Weight" id="workout-weight" name="workout-weight" />
                                     </p>
                                 </div>
-                                <button type="submit">Add Workout</button>
+                                <input class="submit-button" type="submit" value="Add Workout">
                             </form>
                         </div>
                     </div>
@@ -105,8 +105,8 @@
                 </div>
                 <div class="workout-log-cards">
                     <div class="statistics-card">
-                        <table>
-                            <caption>Workout Log</caption>
+                        <table class="logged-workouts">
+                            <caption>Most Recent Workout Logs</caption>
                             <thead>
                                 <tr>
                                     <th>Date</th>
@@ -152,6 +152,13 @@
                                     <td>6</td>
                                     <td>200 lbs</td>
                                 </tr>
+                                <tr>
+                                    <td>06/20/2025</td>
+                                    <td>Bench Press</td>
+                                    <td>2</td>
+                                    <td>4</td>
+                                    <td>175 lbs</td>
+                                </tr>
                             </tbody>
                         </table>
 
@@ -189,5 +196,6 @@
             <h3>© 2025 Joseph Hermansen</h3>
         </div>
     </footer>
+    <script src="app.js"></script>
 </body>
 </html>
