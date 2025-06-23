@@ -20,6 +20,7 @@ let listOfWorkouts = [
 
 const workoutForm = document.querySelector('.workout-form');
 const workoutDate = document.querySelector('#workout-date');
+const workoutTableBody = document.querySelector('.individual-workouts');
 const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
 
 
@@ -28,10 +29,12 @@ const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
 function addWorkout(e) {
     e.preventDefault();
     const date = (this.querySelector('[name=workout-date]')).value;
-    const exercise = (this.querySelector('[name=exercise]')).value;
+    const exerciseSelect = this.querySelector('[name=exercise]');
+    const exercise = exerciseSelect.options[exerciseSelect.selectedIndex].text;
     const sets = (this.querySelector('[name=workout-sets]')).value;
     const reps = (this.querySelector('[name=workout-reps]')).value;
     const weight = (this.querySelector('[name=workout-weight]')).value;
+    testInfo({value: date});
     const individualWorkout = {
         date,
         exercise,
@@ -40,13 +43,25 @@ function addWorkout(e) {
         weight
     };
 
-    workouts.push()
+    workouts.push(individualWorkout);
+    populateTable(workouts, workoutTableBody);
+    localStorage.setItem('workouts', JSON.stringify(workouts));
+    this.reset();
     //console.log(testInfo(workoutDate));
     //console.log("WOOW!");
 }
 
 function populateTable(loggedWorkouts = [], workoutsList) {
-
+    workoutsList.innerHTML = loggedWorkouts.map((workout, i) => {
+        return `
+            <tr id="row${i}">
+                <td>${workout.date}</td>
+                <td>${workout.exercise}</td>
+                <td>${workout.sets}</td>
+                <td>${workout.reps}</td>
+                <td>${workout.weight} lbs</td>
+            </tr>`;
+    }).join('');
 }
 
 
