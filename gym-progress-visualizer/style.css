@@ -82,6 +82,13 @@ form {
     padding: 1em;
 }
 
+.error-message {
+    color: #d32f2f;
+    text-align: center;
+    font-weight: bold;
+    padding-top: 5px;
+  }
+
 form p, form button, .smaller-stats input, .bigger-stats input, .exercises {
     width: 100%;
     box-sizing: border-box;
