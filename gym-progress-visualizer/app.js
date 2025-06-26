@@ -17,6 +17,7 @@ const workoutDate = document.querySelector('#workout-date');
 const workoutTableBody = document.querySelector('.individual-workouts');
 const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
 const errorMessage = document.querySelector('.error-message');
+const lifts = document.querySelector('.lifts');
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -44,6 +45,7 @@ function addWorkout(e) {
 
     workouts.push(individualWorkout);
     populateTable(workouts, workoutTableBody);
+    displayPersonalRecords(workouts, lifts);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
     //console.log(testDate(workoutDate));
@@ -51,7 +53,8 @@ function addWorkout(e) {
 }
 
 function populateTable(loggedWorkouts = [], workoutsList) {
-    workoutsList.innerHTML = loggedWorkouts.map((workout, i) => {
+    const recentWorkouts = loggedWorkouts.slice(-6);
+    workoutsList.innerHTML = recentWorkouts.map((workout, i) => {
         return `
             <tr id="row${i}">
                 <td>${workout.date}</td>
@@ -60,6 +63,30 @@ function populateTable(loggedWorkouts = [], workoutsList) {
                 <td>${workout.reps}</td>
                 <td>${workout.weight} lbs</td>
             </tr>`;
+    }).join('');
+}
+
+function calculatePersonalRecords(loggedWorkouts = []) {
+    const prs = {}; // object to hold personal records
+
+    loggedWorkouts.forEach(workout => {
+        const {exercise, weight, reps } = workout;
+        console.log(exercise, weight, reps);
+        const oneRM = weight * (1 + (reps * 0.0333));
+        console.log(oneRM);
+
+        if (!prs[exercise] || oneRM > prs[exercise].oneRM) {
+            prs[exercise] = { ...workout, oneRM};
+        }
+    });
+
+    return prs;
+}
+
+function displayPersonalRecords(loggedWorkouts = [], workoutsList) {
+    const prs = calculatePersonalRecords(loggedWorkouts);
+    workoutsList.innerHTML = Object.values(prs).map((pr) => {
+        return `<li>${pr.exercise}: <span>${pr.oneRM.toFixed(1)} lbs</span></li>`;
     }).join('');
 }
 
