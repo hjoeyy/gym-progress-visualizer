@@ -44,7 +44,11 @@
                     </div>
                     <div class="statistics-card">
                         <h3>This Week's Volume</h3>
-                        <p>7,000 lbs</p>
+                        <!-- <p>7,000 lbs</p> -->
+                        <ul class="lifts-two">
+                            <!-- <li>Squat: <span>355.8 lbs</span></li>
+                            <li>Bench: <span>252.8 lbs</span></li> -->
+                        </ul>
                     </div>
                 </div>
                 <div class="workout-cards">
@@ -76,6 +80,9 @@
                                     </p>
                                     <p>
                                         <input type="number" placeholder="Weight" id="workout-weight" name="workout-weight" />
+                                    </p>
+                                    <p>
+                                        <input type="number" placeholder="RIR" id="reps-in-reserve" name="workout-rir" />
                                     </p>
                                 </div>
                                 <input class="submit-button" type="submit" value="Add Workout">
@@ -115,6 +122,7 @@
                                     <th>Sets</th>
                                     <th>Reps</th>
                                     <th>Weight</th>
+                                    <th>RIR</th>
                                 </tr>
                             </thead>
                             <tbody class="individual-workouts">

@@ -18,6 +18,7 @@ const workoutTableBody = document.querySelector('.individual-workouts');
 const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
 const errorMessage = document.querySelector('.error-message');
 const lifts = document.querySelector('.lifts');
+const liftsTwo = document.querySelector('.lifts-two');
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -31,21 +32,24 @@ function addWorkout(e) {
     const date = (this.querySelector('[name=workout-date]')).value;
     const exerciseSelect = this.querySelector('[name=exercise]');
     const exercise = exerciseSelect.options[exerciseSelect.selectedIndex].text;
-    const sets = (this.querySelector('[name=workout-sets]')).value;
-    const reps = (this.querySelector('[name=workout-reps]')).value;
-    const weight = (this.querySelector('[name=workout-weight]')).value;
+    const sets = Number((this.querySelector('[name=workout-sets]')).value);
+    const reps = Number((this.querySelector('[name=workout-reps]')).value);
+    const weight = Number((this.querySelector('[name=workout-weight]')).value);
+    const RIR = Number((this.querySelector('[name=workout-rir]')).value);
     testDate(date);
     const individualWorkout = {
         date,
         exercise,
         sets,
         reps,
-        weight
+        weight,
+        RIR
     };
 
     workouts.push(individualWorkout);
     populateTable(workouts, workoutTableBody);
     displayPersonalRecords(workouts, lifts);
+    displayWeeklyVolumePerExercise(workouts, liftsTwo);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
     //console.log(testDate(workoutDate));
@@ -62,6 +66,7 @@ function populateTable(loggedWorkouts = [], workoutsList) {
                 <td>${workout.sets}</td>
                 <td>${workout.reps}</td>
                 <td>${workout.weight} lbs</td>
+                <td>${workout.RIR}</td>
             </tr>`;
     }).join('');
 }
@@ -70,10 +75,10 @@ function calculatePersonalRecords(loggedWorkouts = []) {
     const prs = {}; // object to hold personal records
 
     loggedWorkouts.forEach(workout => {
-        const {exercise, weight, reps } = workout;
-        console.log(exercise, weight, reps);
-        const oneRM = weight * (1 + (reps * 0.0333));
-        console.log(oneRM);
+        const {exercise, weight, reps, RIR } = workout;
+        //console.log(exercise, weight, reps, RIR);
+        const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
+        //console.log(oneRM);
 
         if (!prs[exercise] || oneRM > prs[exercise].oneRM) {
             prs[exercise] = { ...workout, oneRM};
@@ -90,8 +95,44 @@ function displayPersonalRecords(loggedWorkouts = [], workoutsList) {
     }).join('');
 }
 
+function calculateWeeklyVolumePerExercise(loggedWorkouts = []) {
+    const volumePerExercise = {}; // object to hold the total weekly volume for each exercise
+    loggedWorkouts.forEach(workout => {
+        const { exercise, sets, reps, weight } = workout;
+        const totalVolume = sets * reps * weight;
+        console.log(exercise, sets, reps, weight);
+        console.log(totalVolume);
+        const currentDate = new Date();
+        const currentDay = currentDate.getDay();
+        const currentHour = currentDate.getHours();
+        const currentMinute = currentDate.getMinutes();
+        if ((currentDay >= 0 && currentDay <= 6) && (currentHour >= 0 && currentHour <= 22) && (currentMinute >= 0 && currentMinute < 58)) {
+            if (!volumePerExercise[exercise]) {
+                volumePerExercise[exercise] = { exercise, totalVolume: 0 };
+            }
+            volumePerExercise[exercise].totalVolume += totalVolume;
+        }
+        console.log(currentDate, currentDay, currentHour, currentMinute);
+
+        if (currentDay === 6 || currentHour === 22 || currentMinute === 58) {
+            totalVolume = 0;
+        }
+    });
+
+    return volumePerExercise;
+}
+
+function displayWeeklyVolumePerExercise(loggedWorkouts = [], workoutsList) {
+    const volumePerExercise = calculateWeeklyVolumePerExercise(loggedWorkouts);
+    workoutsList.innerHTML = Object.values(volumePerExercise).map(volume => {
+        return `<li>${volume.exercise}: <span>${volume.totalVolume.toFixed(1)} lbs</span></li>`;
+    }).join();
+}
+
 
 
 workoutForm.addEventListener('submit', addWorkout);
 
 populateTable(workouts, workoutTableBody);
+displayPersonalRecords(workouts, lifts);
+displayWeeklyVolumePerExercise(workouts, liftsTwo);
