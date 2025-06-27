@@ -19,6 +19,7 @@ const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
 const errorMessage = document.querySelector('.error-message');
 const lifts = document.querySelector('.lifts');
 const liftsTwo = document.querySelector('.lifts-two');
+const totalWorkoutsLogged = document.querySelector('.total-workouts');
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -50,6 +51,7 @@ function addWorkout(e) {
     populateTable(workouts, workoutTableBody);
     displayPersonalRecords(workouts, lifts);
     displayWeeklyVolumePerExercise(workouts, liftsTwo);
+    displayTotalWorkouts(workouts, totalWorkoutsLogged);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
     //console.log(testDate(workoutDate));
@@ -69,6 +71,24 @@ function populateTable(loggedWorkouts = [], workoutsList) {
                 <td>${workout.RIR}</td>
             </tr>`;
     }).join('');
+}
+
+function countWorkouts(loggedWorkouts = []) {
+    let totalNumWorkouts = 0;
+
+    loggedWorkouts.forEach(workout => {
+        totalNumWorkouts++;
+    });
+
+    return totalNumWorkouts;
+}
+
+function displayTotalWorkouts(loggedWorkouts = [], workoutsList) {
+    const totalWorkouts = countWorkouts(loggedWorkouts);
+    workoutsList.innerHTML =  `
+    <h3>Workouts Logged</h3>
+    <p>🏋️ ${totalWorkouts}</p>
+    `;
 }
 
 function calculatePersonalRecords(loggedWorkouts = []) {
@@ -95,27 +115,44 @@ function displayPersonalRecords(loggedWorkouts = [], workoutsList) {
     }).join('');
 }
 
+function getStartOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay(); // 0 (Sun) - 6 (Sat)
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - day); // Go back to Sunday
+    return d;
+}
+
+function getEndOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    d.setHours(23, 59, 59, 999);
+    d.setDate(d.getDate() + (6 - day)); // Go forward to Saturday
+    return d;
+}
+
+function parseWorkoutDate(dateStr) {
+    const [month, day, year] = dateStr.split("/").map(Number);
+    return new Date(year, month - 1, day);
+}
+
 function calculateWeeklyVolumePerExercise(loggedWorkouts = []) {
     const volumePerExercise = {}; // object to hold the total weekly volume for each exercise
+    const currentDate = new Date();
+    const weekStart = getStartOfWeek(currentDate);
+    const weekEnd = getEndOfWeek(currentDate);
+
     loggedWorkouts.forEach(workout => {
-        const { exercise, sets, reps, weight } = workout;
-        const totalVolume = sets * reps * weight;
-        console.log(exercise, sets, reps, weight);
-        console.log(totalVolume);
-        const currentDate = new Date();
-        const currentDay = currentDate.getDay();
-        const currentHour = currentDate.getHours();
-        const currentMinute = currentDate.getMinutes();
-        if ((currentDay >= 0 && currentDay <= 6) && (currentHour >= 0 && currentHour <= 22) && (currentMinute >= 0 && currentMinute < 58)) {
+        const { exercise, sets, reps, weight, date} = workout;
+        const workoutDate = parseWorkoutDate(date);
+
+        if (workoutDate >= weekStart && workoutDate <= weekEnd) {
+            const totalVolume = sets * reps * weight;
+
             if (!volumePerExercise[exercise]) {
-                volumePerExercise[exercise] = { exercise, totalVolume: 0 };
+                volumePerExercise[exercise] = { exercise, totalVolume: 0};
             }
             volumePerExercise[exercise].totalVolume += totalVolume;
-        }
-        console.log(currentDate, currentDay, currentHour, currentMinute);
-
-        if (currentDay === 6 || currentHour === 22 || currentMinute === 58) {
-            totalVolume = 0;
         }
     });
 
@@ -136,3 +173,4 @@ workoutForm.addEventListener('submit', addWorkout);
 populateTable(workouts, workoutTableBody);
 displayPersonalRecords(workouts, lifts);
 displayWeeklyVolumePerExercise(workouts, liftsTwo);
+displayTotalWorkouts(workouts, totalWorkoutsLogged);
