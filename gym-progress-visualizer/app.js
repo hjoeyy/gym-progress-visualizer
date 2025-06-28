@@ -20,6 +20,7 @@ const errorMessage = document.querySelector('.error-message');
 const lifts = document.querySelector('.lifts');
 const liftsTwo = document.querySelector('.lifts-two');
 const totalWorkoutsLogged = document.querySelector('.total-workouts');
+const mostImprovedExercise = document.querySelector('.most-improved-exercise');
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -52,6 +53,7 @@ function addWorkout(e) {
     displayPersonalRecords(workouts, lifts);
     displayWeeklyVolumePerExercise(workouts, liftsTwo);
     displayTotalWorkouts(workouts, totalWorkoutsLogged);
+    displayMostImprovedLift(workouts, mostImprovedExercise);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
     //console.log(testDate(workoutDate));
@@ -131,6 +133,34 @@ function getEndOfWeek(date) {
     return d;
 }
 
+function getStartOfLastMonth(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - (28 * 2) + 1); // Go back to beginning of last 4 weeks
+    return d;
+}
+
+function getEndOfLastMonth(date) {
+    const d = new Date(date);
+    d.setHours(23, 59, 59, 999);
+    d.setDate(d.getDate() - 28); // Go back to end of last 4 weeks
+    return d;
+}
+
+function getStartOfCurrentMonth(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - (d.getDate() - 1)); // Go back to beginning of month
+    return d;
+}
+
+function getEndOfCurrentMonth(date) {
+    const d = new Date(date);
+    d.setHours(23, 59, 59, 999);
+    d.setDate(d.getDate() + (28 - d.getDate())); // Go to end of 4 weeks (specifically 4 weeks)
+    return d;
+}
+
 function parseWorkoutDate(dateStr) {
     const [month, day, year] = dateStr.split("/").map(Number);
     return new Date(year, month - 1, day);
@@ -166,6 +196,73 @@ function displayWeeklyVolumePerExercise(loggedWorkouts = [], workoutsList) {
     }).join();
 }
 
+function calculateMostImprovedLift(loggedWorkouts = []) {
+    const volumePerExerciseLastMonth = {};
+    const volumePerExerciseCurrentMonth = {};
+    const percentageIncreases = {};
+    const currentDate = new Date();
+    const lastMonthStart = getStartOfLastMonth(currentDate);
+    const lastMonthEnd = getEndOfLastMonth(currentDate);
+    const currentMonthStart = getStartOfCurrentMonth(currentDate);
+    const currentMonthEnd = getEndOfCurrentMonth(currentDate);
+    let percentageIncrease;
+
+    loggedWorkouts.forEach(workout => {
+        const { exercise, sets, reps, weight, date } = workout;
+        const workoutDate = parseWorkoutDate(date);
+        console.log(exercise, sets, reps, weight, date);
+
+        if (workoutDate >= lastMonthStart && workoutDate <= lastMonthEnd) {
+            const lastMonthTotalVolume = sets * reps * weight;
+            console.log(lastMonthTotalVolume);
+
+            if (!volumePerExerciseLastMonth[exercise]) {
+                volumePerExerciseLastMonth[exercise] = { exercise, lastMonthTotalVolume: 0};
+            }
+            volumePerExerciseLastMonth[exercise].lastMonthTotalVolume += lastMonthTotalVolume;
+        }
+
+        if(workoutDate >= currentMonthStart && workoutDate <= currentMonthEnd) {
+            const currentMonthTotalVolume = sets * reps * weight;
+            console.log(currentMonthTotalVolume);
+
+            if (!volumePerExerciseCurrentMonth[exercise]) {
+                volumePerExerciseCurrentMonth[exercise] = { exercise, currentMonthTotalVolume: 0};
+            }
+            volumePerExerciseCurrentMonth[exercise].currentMonthTotalVolume += currentMonthTotalVolume;
+        }
+    });
+
+    Object.keys(volumePerExerciseCurrentMonth).forEach(exercise => {
+        const currentMonthVolume = volumePerExerciseCurrentMonth[exercise].currentMonthTotalVolume;
+        const lastMonthVolume = volumePerExerciseLastMonth[exercise].lastMonthTotalVolume;
+
+        if (lastMonthVolume > 0) {
+            const percentageIncrease = ((currentMonthVolume - lastMonthVolume) / lastMonthVolume) * 100;
+            percentageIncreases[exercise] = {
+                exercise,
+                percentageIncrease
+            };
+        }
+    });
+
+    let mostImprovedExercise = null;
+    let highestPercentage = -Infinity;
+
+    Object.values(percentageIncreases).forEach(exercise => {
+        if(exercise.percentageIncrease > highestPercentage) {
+            highestPercentage = exercise.percentageIncrease;
+            mostImprovedExercise = exercise;
+        }
+    });
+    
+    return mostImprovedExercise;
+}
+
+function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
+    const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
+    workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (+${mostImprovedLift.percentageIncrease.toFixed(1)}%)</span></p>`;
+}
 
 
 workoutForm.addEventListener('submit', addWorkout);
@@ -174,3 +271,4 @@ populateTable(workouts, workoutTableBody);
 displayPersonalRecords(workouts, lifts);
 displayWeeklyVolumePerExercise(workouts, liftsTwo);
 displayTotalWorkouts(workouts, totalWorkoutsLogged);
+displayMostImprovedLift(workouts, mostImprovedExercise);

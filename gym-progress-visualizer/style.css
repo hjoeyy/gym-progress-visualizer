@@ -58,6 +58,10 @@
     margin: 0;
 }
 
+.statistics-card .summary-stats .summary-stat p {
+    font-weight: bold;
+}
+
 .workout-cards {
     display: flex;
     justify-content: center;
