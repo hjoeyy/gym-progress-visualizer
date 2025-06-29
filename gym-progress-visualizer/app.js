@@ -249,6 +249,7 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
     let mostImprovedExercise = null;
     let highestPercentage = -Infinity;
 
+
     Object.values(percentageIncreases).forEach(exercise => {
         if(exercise.percentageIncrease > highestPercentage) {
             highestPercentage = exercise.percentageIncrease;
@@ -264,6 +265,39 @@ function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
     workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (+${mostImprovedLift.percentageIncrease.toFixed(1)}%)</span></p>`;
 }
 
+function calculateWeekStreak(loggedWorkouts = []) {
+
+    // const allWorkoutDates = parseWorkoutDate(loggedWorkouts.date);
+    // loggedWorkouts.sort(allWorkoutDates.getTime());
+    // const datesArray = loggedWorkouts.map(workout => workout.date);
+    // datesArray.sort();
+    const currentDate = new Date();
+    const weekStart = getStartOfWeek(currentDate);
+    const weekEnd = getEndOfWeek(currentDate);
+    
+    const sortedWorkoutsByDate = loggedWorkouts.sort((a, b) => parseWorkoutDate(a.date) - parseWorkoutDate(b.date)); // sorts all workouts by date
+
+    const groupWorkoutsByWeek = sortedWorkoutsByDate.map(workout => getStartOfWeek(parseWorkoutDate(workout.date)));
+    sortedWorkoutsByDate.forEach(workout => {
+        const { exercise, sets, reps, weight, date } = workout;
+        const workoutDate = parseWorkoutDate(date);
+        
+        console.log('Checking workout date:', workoutDate, 'for exercise:', exercise, 'day of week: ', workoutDate.getDay());
+        
+        if ((workoutDate.getDay() >= 0 && workoutDate.getDay() <= 6)) {
+            console.log('DING DING WE GOT A WINNER!');
+        }
+    });
+
+    return groupWorkoutsByWeek;
+}
+
+function displayWeekStreak(loggedWorkouts = [], workoutsList) {
+    const currentWeekStreak = calculateWeekStreak(loggedWorkouts);
+    // Add your display logic here
+    console.log('Week streak calculated:', currentWeekStreak);
+}
+
 
 workoutForm.addEventListener('submit', addWorkout);
 
@@ -272,3 +306,4 @@ displayPersonalRecords(workouts, lifts);
 displayWeeklyVolumePerExercise(workouts, liftsTwo);
 displayTotalWorkouts(workouts, totalWorkoutsLogged);
 displayMostImprovedLift(workouts, mostImprovedExercise);
+displayWeekStreak(workouts);
