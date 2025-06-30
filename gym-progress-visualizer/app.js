@@ -21,6 +21,7 @@ const lifts = document.querySelector('.lifts');
 const liftsTwo = document.querySelector('.lifts-two');
 const totalWorkoutsLogged = document.querySelector('.total-workouts');
 const mostImprovedExercise = document.querySelector('.most-improved-exercise');
+const bestWeekStreak = document.querySelector('.best-week-streak');
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -54,6 +55,7 @@ function addWorkout(e) {
     displayWeeklyVolumePerExercise(workouts, liftsTwo);
     displayTotalWorkouts(workouts, totalWorkoutsLogged);
     displayMostImprovedLift(workouts, mostImprovedExercise);
+    displayWeekStreak(workouts, bestWeekStreak);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
     //console.log(testDate(workoutDate));
@@ -275,9 +277,10 @@ function calculateWeekStreak(loggedWorkouts = []) {
     const weekStart = getStartOfWeek(currentDate);
     const weekEnd = getEndOfWeek(currentDate);
     const weeklyGroups = {};
-    let weekStreakCount = 0;
+    
     
     const sortedWorkoutsByDate = loggedWorkouts.sort((a, b) => parseWorkoutDate(a.date) - parseWorkoutDate(b.date)); // sorts all workouts by date
+    const earliestDate = sortedWorkoutsByDate[0].date;
 
     //const groupWorkoutsByWeek = sortedWorkoutsByDate.map(workout => getStartOfWeek(parseWorkoutDate(workout.date).toISOString()));
     sortedWorkoutsByDate.forEach(workout => {
@@ -292,31 +295,30 @@ function calculateWeekStreak(loggedWorkouts = []) {
         weeklyGroups[weekKey].push(workout);
     });
 
-    for (const week in weeklyGroups) {
-        if (weeklyGroups[week].length > 0) { // if there is at least one workout in the week then add it to the streak
-            weekStreakCount++;
+    let weekStreak = 0;
+    const earliestWeek = getStartOfWeek(earliestDate);
+    const latestWeek = getStartOfWeek(currentDate);
+    latestWeek.setDate(latestWeek.getDate() - 7); // go back one week to check the previous week to keep current week streak
+    let current = new Date(earliestWeek);
+
+    while (current <= latestWeek) {
+        let weekKey = current.toISOString().split('T')[0];
+        if(weeklyGroups[weekKey] && weeklyGroups[weekKey].length > 0) { // check if there is at least one workout in each week
+            weekStreak++;
         }
         else {
-            weekStreakCount = 0; // the moment there is no workout in a week, break the streak
+            weekStreak = 0; // the moment there isn't reset the streak
         }
+        console.log(weekStreak);
+        current.setDate(current.getDate() + 7);
     }
-
-    // weeklyGroups[].forEach(week => {
-    //     if (weeklyGroups[week].length > 0) { // if there is at least one workout in the week then add it to the streak
-    //         weekStreakCount++;
-    //     }
-    //     else {
-    //         weekStreakCount = 0; // the moment there is no workout in a week, break the streak
-    //     }
-    // });
-    console.log(weeklyGroups);
-    return weekStreakCount;
+    //console.log(weeklyGroups);
+    return weekStreak;
 }
 
 function displayWeekStreak(loggedWorkouts = [], workoutsList) {
     const currentWeekStreak = calculateWeekStreak(loggedWorkouts);
-    // Add your display logic here
-    console.log('Week streak calculated:', currentWeekStreak);
+    workoutsList.innerHTML = `<p>Best Week Streak: <br><br><span>${currentWeekStreak}</span></p>`;
 }
 
 
@@ -327,4 +329,4 @@ displayPersonalRecords(workouts, lifts);
 displayWeeklyVolumePerExercise(workouts, liftsTwo);
 displayTotalWorkouts(workouts, totalWorkoutsLogged);
 displayMostImprovedLift(workouts, mostImprovedExercise);
-displayWeekStreak(workouts);
+displayWeekStreak(workouts, bestWeekStreak);
