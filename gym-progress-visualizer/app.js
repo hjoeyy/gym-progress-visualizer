@@ -309,7 +309,7 @@ function calculateWeekStreak(loggedWorkouts = []) {
         else {
             weekStreak = 0; // the moment there isn't reset the streak
         }
-        console.log(weekStreak);
+        //console.log(weekStreak);
         current.setDate(current.getDate() + 7);
     }
     //console.log(weeklyGroups);
