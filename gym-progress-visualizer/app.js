@@ -274,22 +274,43 @@ function calculateWeekStreak(loggedWorkouts = []) {
     const currentDate = new Date();
     const weekStart = getStartOfWeek(currentDate);
     const weekEnd = getEndOfWeek(currentDate);
+    const weeklyGroups = {};
+    let weekStreakCount = 0;
     
     const sortedWorkoutsByDate = loggedWorkouts.sort((a, b) => parseWorkoutDate(a.date) - parseWorkoutDate(b.date)); // sorts all workouts by date
 
-    const groupWorkoutsByWeek = sortedWorkoutsByDate.map(workout => getStartOfWeek(parseWorkoutDate(workout.date)));
+    //const groupWorkoutsByWeek = sortedWorkoutsByDate.map(workout => getStartOfWeek(parseWorkoutDate(workout.date).toISOString()));
     sortedWorkoutsByDate.forEach(workout => {
         const { exercise, sets, reps, weight, date } = workout;
         const workoutDate = parseWorkoutDate(date);
-        
-        console.log('Checking workout date:', workoutDate, 'for exercise:', exercise, 'day of week: ', workoutDate.getDay());
-        
-        if ((workoutDate.getDay() >= 0 && workoutDate.getDay() <= 6)) {
-            console.log('DING DING WE GOT A WINNER!');
+        const weekKey = getStartOfWeek(workoutDate).toISOString().split('T')[0]; // identifier to group elements by week
+
+        // console.log('Checking workout date:', workoutDate, 'for exercise:', exercise, 'day of week: ', workoutDate.getDay());
+        if (!weeklyGroups[weekKey]) {
+            weeklyGroups[weekKey] = [];
         }
+        weeklyGroups[weekKey].push(workout);
     });
 
-    return groupWorkoutsByWeek;
+    for (const week in weeklyGroups) {
+        if (weeklyGroups[week].length > 0) { // if there is at least one workout in the week then add it to the streak
+            weekStreakCount++;
+        }
+        else {
+            weekStreakCount = 0; // the moment there is no workout in a week, break the streak
+        }
+    }
+
+    // weeklyGroups[].forEach(week => {
+    //     if (weeklyGroups[week].length > 0) { // if there is at least one workout in the week then add it to the streak
+    //         weekStreakCount++;
+    //     }
+    //     else {
+    //         weekStreakCount = 0; // the moment there is no workout in a week, break the streak
+    //     }
+    // });
+    console.log(weeklyGroups);
+    return weekStreakCount;
 }
 
 function displayWeekStreak(loggedWorkouts = [], workoutsList) {
