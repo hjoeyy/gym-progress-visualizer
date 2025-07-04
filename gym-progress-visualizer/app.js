@@ -22,6 +22,7 @@ const liftsTwo = document.querySelector('.lifts-two');
 const totalWorkoutsLogged = document.querySelector('.total-workouts');
 const mostImprovedExercise = document.querySelector('.most-improved-exercise');
 const bestWeekStreak = document.querySelector('.best-week-streak');
+const totalProgressIncrease = document.querySelector('.total-progress-increase');
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -56,6 +57,7 @@ function addWorkout(e) {
     displayTotalWorkouts(workouts, totalWorkoutsLogged);
     displayMostImprovedLift(workouts, mostImprovedExercise);
     displayWeekStreak(workouts, bestWeekStreak);
+    displayTotalProgressIncrease(workouts, totalProgressIncrease);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
     //console.log(testDate(workoutDate));
@@ -152,14 +154,14 @@ function getEndOfLastMonth(date) {
 function getStartOfCurrentMonth(date) {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - (d.getDate() - 1)); // Go back to beginning of month
+    d.setDate(d.getDate() - 27); // Go back to beginning of most recent 4 weeks
     return d;
 }
 
 function getEndOfCurrentMonth(date) {
     const d = new Date(date);
     d.setHours(23, 59, 59, 999);
-    d.setDate(d.getDate() + (28 - d.getDate())); // Go to end of 4 weeks (specifically 4 weeks)
+    // today
     return d;
 }
 
@@ -193,6 +195,10 @@ function calculateWeeklyVolumePerExercise(loggedWorkouts = []) {
 
 function displayWeeklyVolumePerExercise(loggedWorkouts = [], workoutsList) {
     const volumePerExercise = calculateWeeklyVolumePerExercise(loggedWorkouts);
+    if (Object.keys(volumePerExercise).length === 0) {
+        workoutsList.innerHTML = `<li>No data yet</li>`;
+        return;
+    }
     workoutsList.innerHTML = Object.values(volumePerExercise).map(volume => {
         return `<li>${volume.exercise}: <span>${volume.totalVolume.toFixed(1)} lbs</span></li>`;
     }).join();
@@ -207,7 +213,6 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
     const lastMonthEnd = getEndOfLastMonth(currentDate);
     const currentMonthStart = getStartOfCurrentMonth(currentDate);
     const currentMonthEnd = getEndOfCurrentMonth(currentDate);
-    let percentageIncrease;
 
     loggedWorkouts.forEach(workout => {
         const { exercise, sets, reps, weight, date } = workout;
@@ -264,6 +269,10 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
 
 function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
     const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
+    if(!mostImprovedLift) {
+        workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>No Data</span></p>`;
+        return;
+    }
     workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (+${mostImprovedLift.percentageIncrease.toFixed(1)}%)</span></p>`;
 }
 
@@ -274,8 +283,6 @@ function calculateWeekStreak(loggedWorkouts = []) {
     // const datesArray = loggedWorkouts.map(workout => workout.date);
     // datesArray.sort();
     const currentDate = new Date();
-    const weekStart = getStartOfWeek(currentDate);
-    const weekEnd = getEndOfWeek(currentDate);
     const weeklyGroups = {};
     
     
@@ -284,7 +291,7 @@ function calculateWeekStreak(loggedWorkouts = []) {
 
     //const groupWorkoutsByWeek = sortedWorkoutsByDate.map(workout => getStartOfWeek(parseWorkoutDate(workout.date).toISOString()));
     sortedWorkoutsByDate.forEach(workout => {
-        const { exercise, sets, reps, weight, date } = workout;
+        const { date } = workout;
         const workoutDate = parseWorkoutDate(date);
         const weekKey = getStartOfWeek(workoutDate).toISOString().split('T')[0]; // identifier to group elements by week
 
@@ -297,10 +304,18 @@ function calculateWeekStreak(loggedWorkouts = []) {
 
     let weekStreak = 0;
     const earliestWeek = getStartOfWeek(earliestDate);
-    const latestWeek = getStartOfWeek(currentDate);
-    latestWeek.setDate(latestWeek.getDate() - 7); // go back one week to check the previous week to keep current week streak
+    //const latestWeek = getStartOfWeek(currentDate);
+    //latestWeek.setDate(latestWeek.getDate() - 7); // go back one week to check the previous week to keep current week streak
     let current = new Date(earliestWeek);
-
+    const currentWeekKey = getStartOfWeek(currentDate).toISOString().split('T')[0];
+    const isWorkoutThisWeek = weeklyGroups[currentWeekKey] && weeklyGroups[currentWeekKey].length > 0;
+    let latestWeek;
+    if (isWorkoutThisWeek) { // we want to add to the streak if there is a workout logged this week with preserving the streak until the end of the week if no log
+        latestWeek = getStartOfWeek(currentDate);
+    } else {
+        latestWeek = getStartOfWeek(currentDate);
+        latestWeek = latestWeek.setDate(latestWeek.getDate() - 7);
+    }
     while (current <= latestWeek) {
         let weekKey = current.toISOString().split('T')[0];
         if(weeklyGroups[weekKey] && weeklyGroups[weekKey].length > 0) { // check if there is at least one workout in each week
@@ -312,16 +327,50 @@ function calculateWeekStreak(loggedWorkouts = []) {
         //console.log(weekStreak);
         current.setDate(current.getDate() + 7);
     }
-    //console.log(weeklyGroups);
+    console.log(weeklyGroups);
     return weekStreak;
 }
 
 function displayWeekStreak(loggedWorkouts = [], workoutsList) {
     const currentWeekStreak = calculateWeekStreak(loggedWorkouts);
-    workoutsList.innerHTML = `<p>Best Week Streak: <br><br><span>${currentWeekStreak}</span></p>`;
+    workoutsList.innerHTML = `<p>Best Week Streak: <br><br><span>${currentWeekStreak || 0}</span></p>`;
 }
 
+function calculateTotalProgressIncrease(loggedWorkouts = []) {
+    let lastMonthTotalVolume = 0;
+    let currentMonthTotalVolume = 0;
+    let percentageIncrease = -Infinity;
+    const currentDate = new Date();
+    const lastMonthStart = getStartOfLastMonth(currentDate);
+    const lastMonthEnd = getEndOfLastMonth(currentDate);
+    const currentMonthStart = getStartOfCurrentMonth(currentDate);
+    const currentMonthEnd = getEndOfCurrentMonth(currentDate);
 
+    loggedWorkouts.forEach(workout => {
+        const { date, sets, reps, weight } = workout;
+        const workoutDate = parseWorkoutDate(date);
+        console.log(workoutDate);
+        if (workoutDate >= lastMonthStart && workoutDate <= lastMonthEnd) {
+            lastMonthTotalVolume += sets * reps * weight;
+            console.log("last month total volume: ", lastMonthTotalVolume);
+        }
+        if (workoutDate >= currentMonthStart && workoutDate <= currentMonthEnd) {
+            currentMonthTotalVolume += sets * reps * weight;
+            console.log("current month total volume: ", currentMonthTotalVolume);
+        }
+    });
+
+    if (lastMonthTotalVolume > 0) {
+        percentageIncrease = Number((((currentMonthTotalVolume - lastMonthTotalVolume) / lastMonthTotalVolume) * 100).toFixed(2));
+    }
+    return percentageIncrease;
+}
+
+function displayTotalProgressIncrease(loggedWorkouts = [], workoutsList) {
+    const progressIncrease = calculateTotalProgressIncrease(loggedWorkouts);
+
+    workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>${progressIncrease > 0 ? '+' + progressIncrease : progressIncrease}%</span></p>`;
+}                                                                                                                                                               
 workoutForm.addEventListener('submit', addWorkout);
 
 populateTable(workouts, workoutTableBody);
@@ -330,3 +379,4 @@ displayWeeklyVolumePerExercise(workouts, liftsTwo);
 displayTotalWorkouts(workouts, totalWorkoutsLogged);
 displayMostImprovedLift(workouts, mostImprovedExercise);
 displayWeekStreak(workouts, bestWeekStreak);
+displayTotalProgressIncrease(workouts, totalProgressIncrease);
