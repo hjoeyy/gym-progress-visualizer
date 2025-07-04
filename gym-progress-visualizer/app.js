@@ -12,7 +12,7 @@ function testDate(dateInput) {
     }
 }
 
-const workoutForm = document.querySelector('.workout-form');
+const addWorkoutForm = document.querySelector('.workout-form');
 const workoutDate = document.querySelector('#workout-date');
 const workoutTableBody = document.querySelector('.individual-workouts');
 const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
@@ -23,6 +23,7 @@ const totalWorkoutsLogged = document.querySelector('.total-workouts');
 const mostImprovedExercise = document.querySelector('.most-improved-exercise');
 const bestWeekStreak = document.querySelector('.best-week-streak');
 const totalProgressIncrease = document.querySelector('.total-progress-increase');
+const deleteWorkoutForm = document.querySelector('.delete-workout-form');
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -33,6 +34,7 @@ function displayError(message) {
 
 function addWorkout(e) {
     e.preventDefault();
+    const number = workouts.length + 1;
     const date = (this.querySelector('[name=workout-date]')).value;
     const exerciseSelect = this.querySelector('[name=exercise]');
     const exercise = exerciseSelect.options[exerciseSelect.selectedIndex].text;
@@ -42,6 +44,7 @@ function addWorkout(e) {
     const RIR = Number((this.querySelector('[name=workout-rir]')).value);
     testDate(date);
     const individualWorkout = {
+        number,
         date,
         exercise,
         sets,
@@ -51,6 +54,7 @@ function addWorkout(e) {
     };
 
     workouts.push(individualWorkout);
+    reassignWorkoutNumbers(workouts);
     populateTable(workouts, workoutTableBody);
     displayPersonalRecords(workouts, lifts);
     displayWeeklyVolumePerExercise(workouts, liftsTwo);
@@ -64,11 +68,34 @@ function addWorkout(e) {
     //console.log("WOOW!");
 }
 
+function deleteWorkout(e) {
+    e.preventDefault();
+    const workoutNumber = (this.querySelector('[name=workout-number]')).value; // grab input from user
+    workouts.splice(workoutNumber - 1, 1); // because we put the number ahead by 1, index is behind by 1 due to that
+    reassignWorkoutNumbers(workouts);
+    populateTable(workouts, workoutTableBody);
+    displayPersonalRecords(workouts, lifts);
+    displayWeeklyVolumePerExercise(workouts, liftsTwo);
+    displayTotalWorkouts(workouts, totalWorkoutsLogged);
+    displayMostImprovedLift(workouts, mostImprovedExercise);
+    displayWeekStreak(workouts, bestWeekStreak);
+    displayTotalProgressIncrease(workouts, totalProgressIncrease);
+    localStorage.setItem('workouts', JSON.stringify(workouts));
+    this.reset();
+}
+
+function reassignWorkoutNumbers(loggedWorkouts = []) {
+    loggedWorkouts.forEach((workout, idx) => {
+        workout.number = idx + 1; // fixes the array after a change by reassigning everything orderly
+    });
+}
+
 function populateTable(loggedWorkouts = [], workoutsList) {
     const recentWorkouts = loggedWorkouts.slice(-6);
     workoutsList.innerHTML = recentWorkouts.map((workout, i) => {
         return `
             <tr id="row${i}">
+                <td>${workout.number}</td>
                 <td>${workout.date}</td>
                 <td>${workout.exercise}</td>
                 <td>${workout.sets}</td>
@@ -371,7 +398,9 @@ function displayTotalProgressIncrease(loggedWorkouts = [], workoutsList) {
 
     workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>${progressIncrease > 0 ? '+' + progressIncrease : progressIncrease}%</span></p>`;
 }                                                                                                                                                               
-workoutForm.addEventListener('submit', addWorkout);
+addWorkoutForm.addEventListener('submit', addWorkout);
+deleteWorkoutForm.addEventListener('submit', deleteWorkout);
+
 
 populateTable(workouts, workoutTableBody);
 displayPersonalRecords(workouts, lifts);

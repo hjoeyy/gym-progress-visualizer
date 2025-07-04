@@ -178,6 +178,33 @@ p.lighter-text {
     font-size: 12px;
 }
 
+
+
+.delete-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.delete-workout-form {
+    max-width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.delete-workout-form input, button {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+.workout-number {
+    width: 100%;
+    justify-content: center;
+}
+
+
 .workout-log-cards {
     display: flex;
     justify-content: center;
