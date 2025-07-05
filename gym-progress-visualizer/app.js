@@ -26,6 +26,7 @@ const mostImprovedExercise = document.querySelector('.most-improved-exercise');
 const bestWeekStreak = document.querySelector('.best-week-streak');
 const totalProgressIncrease = document.querySelector('.total-progress-increase');
 const deleteWorkoutForm = document.querySelector('.delete-workout-form');
+const record = document.querySelector('.record');
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -64,6 +65,7 @@ function addWorkout(e) {
     displayMostImprovedLift(workouts, mostImprovedExercise);
     displayWeekStreak(workouts, bestWeekStreak);
     displayTotalProgressIncrease(workouts, totalProgressIncrease);
+    displayRecords(workouts, record);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
     //console.log(testDate(workoutDate));
@@ -82,6 +84,7 @@ function deleteWorkout(e) {
     displayMostImprovedLift(workouts, mostImprovedExercise);
     displayWeekStreak(workouts, bestWeekStreak);
     displayTotalProgressIncrease(workouts, totalProgressIncrease);
+    displayRecords(workouts, record);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
 }
@@ -126,6 +129,8 @@ function displayTotalWorkouts(loggedWorkouts = [], workoutsList) {
     `;
 }
 
+
+
 function calculatePersonalRecords(loggedWorkouts = []) {
     const prs = {}; // object to hold personal records
 
@@ -136,6 +141,23 @@ function calculatePersonalRecords(loggedWorkouts = []) {
         //console.log(oneRM);
 
         if (!prs[exercise] || oneRM > prs[exercise].oneRM) {
+            prs[exercise] = { ...workout, oneRM};
+        }
+    });
+
+    return prs;
+}
+
+function calculateLowestPersonalRecords(loggedWorkouts = []) {
+    const prs = {}; // object to hold personal records
+
+    loggedWorkouts.forEach(workout => {
+        const {exercise, weight, reps, RIR } = workout;
+        //console.log(exercise, weight, reps, RIR);
+        const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
+        //console.log(oneRM);
+
+        if (!prs[exercise] || oneRM < prs[exercise].oneRM) {
             prs[exercise] = { ...workout, oneRM};
         }
     });
@@ -246,11 +268,11 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
     loggedWorkouts.forEach(workout => {
         const { exercise, sets, reps, weight, date } = workout;
         const workoutDate = parseWorkoutDate(date);
-        console.log(exercise, sets, reps, weight, date);
+        //console.log(exercise, sets, reps, weight, date);
 
         if (workoutDate >= lastMonthStart && workoutDate <= lastMonthEnd) {
             const lastMonthTotalVolume = sets * reps * weight;
-            console.log(lastMonthTotalVolume);
+            //console.log(lastMonthTotalVolume);
 
             if (!volumePerExerciseLastMonth[exercise]) {
                 volumePerExerciseLastMonth[exercise] = { exercise, lastMonthTotalVolume: 0};
@@ -260,7 +282,7 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
 
         if(workoutDate >= currentMonthStart && workoutDate <= currentMonthEnd) {
             const currentMonthTotalVolume = sets * reps * weight;
-            console.log(currentMonthTotalVolume);
+            //console.log(currentMonthTotalVolume);
 
             if (!volumePerExerciseCurrentMonth[exercise]) {
                 volumePerExerciseCurrentMonth[exercise] = { exercise, currentMonthTotalVolume: 0};
@@ -302,7 +324,7 @@ function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
         workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>No Data</span></p>`;
         return;
     }
-    workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (+${mostImprovedLift.percentageIncrease.toFixed(1)}%)</span></p>`;
+    workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (${mostImprovedLift.percentageIncrease > 0 ? '+' + mostImprovedLift.percentageIncrease.toFixed(1) : mostImprovedLift.percentageIncrease.toFixed(1)}%)</span></p>`;
 }
 
 function calculateWeekStreak(loggedWorkouts = []) {
@@ -356,7 +378,7 @@ function calculateWeekStreak(loggedWorkouts = []) {
         //console.log(weekStreak);
         current.setDate(current.getDate() + 7);
     }
-    console.log(weeklyGroups);
+    //console.log(weeklyGroups);
     return weekStreak;
 }
 
@@ -378,7 +400,7 @@ function calculateTotalProgressIncrease(loggedWorkouts = []) {
     loggedWorkouts.forEach(workout => {
         const { date, sets, reps, weight } = workout;
         const workoutDate = parseWorkoutDate(date);
-        console.log(workoutDate);
+        //console.log(workoutDate);
         if (workoutDate >= lastMonthStart && workoutDate <= lastMonthEnd) {
             lastMonthTotalVolume += sets * reps * weight;
             console.log("last month total volume: ", lastMonthTotalVolume);
@@ -399,7 +421,121 @@ function displayTotalProgressIncrease(loggedWorkouts = [], workoutsList) {
     const progressIncrease = calculateTotalProgressIncrease(loggedWorkouts);
 
     workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>${progressIncrease > 0 ? '+' + progressIncrease : progressIncrease}%</span></p>`;
-}                                                                                                                                                               
+} 
+
+function calculatePRForRecordLift(loggedWorkouts = []) {
+    const theRecordLift = calculateMostImprovedLift(loggedWorkouts);
+    if (!theRecordLift) {
+        return [];
+    }
+    const recordLiftLogs = [];
+    loggedWorkouts.forEach(workout => {
+        const { exercise } = workout;
+        if (exercise === theRecordLift.exercise) {
+            recordLiftLogs.push(workout);
+        }
+    });
+    return recordLiftLogs;
+}
+
+function calculateLowestPRForRecordLift(loggedWorkouts = []) {
+    const recordLiftLogs = calculatePRForRecordLift(loggedWorkouts);
+    return calculateLowestPersonalRecords(recordLiftLogs);
+}
+
+function calculateHighestPRForRecordLift(loggedWorkouts = []) {
+    const recordLiftLogs = calculatePRForRecordLift(loggedWorkouts);
+    return calculatePersonalRecords(recordLiftLogs);
+}
+
+function displayRecords(loggedWorkouts = [], workoutsList) {
+    const theRecordWorkout = calculateHighestPRForRecordLift(loggedWorkouts);
+    if (!theRecordWorkout || Object.keys(theRecordWorkout).length === 0) {
+        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data</span></p>`;
+        return;
+    }
+    
+    // Get the most improved exercise name
+    const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
+    if (!mostImprovedLift) {
+        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data</span></p>`;
+        return;
+    }
+    
+    // Get the record for that specific exercise
+    const recordForExercise = theRecordWorkout[mostImprovedLift.exercise];
+    if (!recordForExercise) {
+        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data</span></p>`;
+        return;
+    }
+    
+    workoutsList.innerHTML = `<p>${recordForExercise.exercise}: 
+    <span>${recordForExercise.weight} lbs x ${recordForExercise.reps} reps 
+    (${recordForExercise.date})</span></p>`;
+}
+
+function calculatePRPerExerciseForRecordLift(loggedWorkouts = []) {
+    const prs = []; // array to hold all the PRs for the record exercise
+    const bestWorkoutPRs = calculatePRForRecordLift(loggedWorkouts);
+
+    bestWorkoutPRs.forEach(workout => {
+        const { weight, reps, RIR, date } = workout;
+        const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
+        prs.push(oneRM);
+    });
+    return prs;
+}
+
+// chart
+
+const ctx = document.getElementById('myChart');
+let xValues = [];
+const yValues = [calculatePRPerExerciseForRecordLift(workouts)];
+const currentDate = new Date();
+const currentMonthStart = getStartOfCurrentMonth(currentDate);
+const currentMonthEnd = getEndOfCurrentMonth(currentDate);
+const earliestDate = workouts[0].date;
+const earliestWeek = getStartOfWeek(earliestDate);
+const startingLastMonth = getStartOfLastMonth(currentDate);
+const startingLastWeek = getStartOfWeek(startingLastMonth);
+const latestWeek = getStartOfWeek(currentDate);
+let current = new Date(startingLastWeek);
+
+
+// workouts.forEach(workout => {
+//     const { date } = workout;
+//     const workoutDate = parseWorkoutDate(date);
+
+// });
+
+while (current <= latestWeek) {
+    const weekKey = current.toISOString().split('T')[0];
+    const shortenedDate = weekKey.slice(5);
+    xValues.push(shortenedDate);
+    current.setDate(current.getDate() + 7);
+}
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: xValues,
+    datasets: [{
+      label: 'PRs',
+      backgroundColor: "#2963a3",
+      borderColor: "#2963a3",
+      data: yValues,
+      borderWidth: 1
+    }]
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: false
+      }
+    }
+  }
+});
+
 addWorkoutForm.addEventListener('submit', addWorkout);
 deleteWorkoutForm.addEventListener('submit', deleteWorkout);
 
@@ -411,27 +547,8 @@ displayTotalWorkouts(workouts, totalWorkoutsLogged);
 displayMostImprovedLift(workouts, mostImprovedExercise);
 displayWeekStreak(workouts, bestWeekStreak);
 displayTotalProgressIncrease(workouts, totalProgressIncrease);
+displayRecords(workouts, record);
 
 
-// chart
 
-const ctx = document.getElementById('myChart');
 
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-    datasets: [{
-      label: '# of Votes',
-      data: [12, 19, 3, 5, 2, 3],
-      borderWidth: 1
-    }]
-  },
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
-  }
-});

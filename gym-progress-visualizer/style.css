@@ -147,7 +147,10 @@ p.lighter-text {
     font-weight: normal;
 }
 
-.y-axis ul {
+.records-graph {
+
+}
+/* .y-axis ul {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -176,7 +179,7 @@ p.lighter-text {
     font-weight: normal;
     color: gray;
     font-size: 12px;
-}
+} */
 
 
 
