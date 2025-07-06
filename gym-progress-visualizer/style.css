@@ -147,9 +147,13 @@ p.lighter-text {
     font-weight: normal;
 }
 
-.records-graph {
-
-}
+/* #myChart {
+    width: 100% !important;
+    max-width: 400px;
+    height: 300px !important;
+    display: block;
+    margin: 0 auto;
+} */
 /* .y-axis ul {
     display: flex;
     flex-direction: column;

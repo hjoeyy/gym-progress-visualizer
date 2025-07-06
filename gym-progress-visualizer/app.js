@@ -1,5 +1,3 @@
-
-
 const re = /^(?:\d{2})([/])\d{2}\1\d{4}$/;
 
 function testDate(dateInput) {
@@ -128,8 +126,6 @@ function displayTotalWorkouts(loggedWorkouts = [], workoutsList) {
     <p>🏋️ ${totalWorkouts}</p>
     `;
 }
-
-
 
 function calculatePersonalRecords(loggedWorkouts = []) {
     const prs = {}; // object to hold personal records
@@ -471,26 +467,38 @@ function displayRecords(loggedWorkouts = [], workoutsList) {
     
     workoutsList.innerHTML = `<p>${recordForExercise.exercise}: 
     <span>${recordForExercise.weight} lbs x ${recordForExercise.reps} reps 
-    (${recordForExercise.date})</span></p>`;
+    (${recordForExercise.date}) with ${recordForExercise.RIR} RIR</span></p>`;
 }
 
 function calculatePRPerExerciseForRecordLift(loggedWorkouts = []) {
-    const prs = []; // array to hold all the PRs for the record exercise
+    const prs = []; // array to hold multiple PR objects
     const bestWorkoutPRs = calculatePRForRecordLift(loggedWorkouts);
 
     bestWorkoutPRs.forEach(workout => {
         const { weight, reps, RIR, date } = workout;
         const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
-        prs.push(oneRM);
+        
+        // Create a new object for each PR and add it to the array
+        prs.push({
+            weight: oneRM,
+            date: date
+        });
     });
     return prs;
+}
+
+function getWeekRange(dateStr) {
+    const date = parseWorkoutDate(dateStr);
+    const start = getStartOfWeek(date);
+    const end = getEndOfWeek(date);
+    return { start, end };
 }
 
 // chart
 
 const ctx = document.getElementById('myChart');
-let xValues = [];
-const yValues = [calculatePRPerExerciseForRecordLift(workouts)];
+// let xValues = [];
+//const yValues = [calculatePRPerExerciseForRecordLift(workouts)];
 const currentDate = new Date();
 const currentMonthStart = getStartOfCurrentMonth(currentDate);
 const currentMonthEnd = getEndOfCurrentMonth(currentDate);
@@ -498,39 +506,65 @@ const earliestDate = workouts[0].date;
 const earliestWeek = getStartOfWeek(earliestDate);
 const startingLastMonth = getStartOfLastMonth(currentDate);
 const startingLastWeek = getStartOfWeek(startingLastMonth);
-const latestWeek = getStartOfWeek(currentDate);
-let current = new Date(startingLastWeek);
+//const latestWeek = getStartOfWeek(currentDate);
+//let current = new Date(startingLastWeek);
 
+const prData = calculatePRPerExerciseForRecordLift(workouts);
+const dataPoints = prData.map(pr => ({
+    x: new Date(pr.date),
+    y: pr.weight
+}));
 
-// workouts.forEach(workout => {
-//     const { date } = workout;
-//     const workoutDate = parseWorkoutDate(date);
-
-// });
-
-while (current <= latestWeek) {
-    const weekKey = current.toISOString().split('T')[0];
-    const shortenedDate = weekKey.slice(5);
-    xValues.push(shortenedDate);
-    current.setDate(current.getDate() + 7);
-}
+// Calculate min/max from all workouts, not just PRs
+const allWorkoutDates = workouts.map(w => parseWorkoutDate(w.date));
+const minDate = new Date(Math.min(...allWorkoutDates));
+const maxDate = new Date(Math.max(...allWorkoutDates));
+const prWeights = prData.map(pr => pr.weight);
+const minPR = Math.min(...prWeights);
+const maxPR = Math.max(...prWeights);
 
 new Chart(ctx, {
   type: 'line',
   data: {
-    labels: xValues,
     datasets: [{
       label: 'PRs',
+      data: dataPoints,
       backgroundColor: "#2963a3",
       borderColor: "#2963a3",
-      data: yValues,
+      showLine: true,
+      pointRadius: 5,
       borderWidth: 1
     }]
   },
   options: {
     scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'week',
+          tooltipFormat: 'MM/dd/yyyy',
+          displayFormats: {
+            week: 'MM/dd'
+          }
+        },
+        min: minDate,
+        max: maxDate,
+        title: {
+          display: true,
+          text: 'Date'
+        }
+      },
       y: {
-        beginAtZero: false
+        beginAtZero: false,
+        min: Math.floor(minPR / 10) * 10 - 10,
+        max: Math.ceil(maxPR / 10) * 10 + 10,
+        title: {
+          display: true,
+          text: 'PR Weight'
+        },
+        ticks: {
+            stepSize: 10
+        }
       }
     }
   }
@@ -538,7 +572,6 @@ new Chart(ctx, {
 
 addWorkoutForm.addEventListener('submit', addWorkout);
 deleteWorkoutForm.addEventListener('submit', deleteWorkout);
-
 
 populateTable(workouts, workoutTableBody);
 displayPersonalRecords(workouts, lifts);
