@@ -72,9 +72,22 @@ function addWorkout(e) {
 
 function deleteWorkout(e) {
     e.preventDefault();
-    const workoutNumber = (this.querySelector('[name=workout-number]')).value; // grab input from user
+    const workoutNumberInput = this.querySelector('[name=workout-number]');
+    const workoutNumber = Number(workoutNumberInput.value);
+
+    if (
+        isNaN(workoutNumber) ||
+        workoutNumber < 1 ||
+        workoutNumber > workouts.length
+    ) {
+        displayError("Invalid workout number!");
+        return;
+    }
+
+    console.log("Before delete:", JSON.stringify(workouts));
     workouts.splice(workoutNumber - 1, 1); // because we put the number ahead by 1, index is behind by 1 due to that
     reassignWorkoutNumbers(workouts);
+    console.log("After delete:", JSON.stringify(workouts));
     populateTable(workouts, workoutTableBody);
     displayPersonalRecords(workouts, lifts);
     displayWeeklyVolumePerExercise(workouts, liftsTwo);
@@ -84,6 +97,7 @@ function deleteWorkout(e) {
     displayTotalProgressIncrease(workouts, totalProgressIncrease);
     displayRecords(workouts, record);
     localStorage.setItem('workouts', JSON.stringify(workouts));
+    console.log("localStorage after set:", localStorage.getItem('workouts'));
     this.reset();
 }
 
@@ -163,6 +177,10 @@ function calculateLowestPersonalRecords(loggedWorkouts = []) {
 
 function displayPersonalRecords(loggedWorkouts = [], workoutsList) {
     const prs = calculatePersonalRecords(loggedWorkouts);
+    if(Object.keys(prs).length === 0) {
+        workoutsList.innerHTML = `<p>No data yet</p>`;
+        return;
+    }
     workoutsList.innerHTML = Object.values(prs).map((pr) => {
         return `<li>${pr.exercise}: <span>${pr.oneRM.toFixed(1)} lbs</span></li>`;
     }).join('');
@@ -317,7 +335,7 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
 function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
     const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
     if(!mostImprovedLift) {
-        workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>No Data</span></p>`;
+        workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>No Data yet</span></p>`;
         return;
     }
     workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (${mostImprovedLift.percentageIncrease > 0 ? '+' + mostImprovedLift.percentageIncrease.toFixed(1) : mostImprovedLift.percentageIncrease.toFixed(1)}%)</span></p>`;
@@ -329,6 +347,8 @@ function calculateWeekStreak(loggedWorkouts = []) {
     // loggedWorkouts.sort(allWorkoutDates.getTime());
     // const datesArray = loggedWorkouts.map(workout => workout.date);
     // datesArray.sort();
+
+    if (!loggedWorkouts.length) return 0;
     const currentDate = new Date();
     const weeklyGroups = {};
     
@@ -415,7 +435,10 @@ function calculateTotalProgressIncrease(loggedWorkouts = []) {
 
 function displayTotalProgressIncrease(loggedWorkouts = [], workoutsList) {
     const progressIncrease = calculateTotalProgressIncrease(loggedWorkouts);
-
+    if(!progressIncrease === undefined || progressIncrease === null || isNaN(progressIncrease) || progressIncrease === Infinity || progressIncrease  === -Infinity) {
+        workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>No Data yet</span></p>`;
+        return;
+    }
     workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>${progressIncrease > 0 ? '+' + progressIncrease : progressIncrease}%</span></p>`;
 } 
 
@@ -447,21 +470,21 @@ function calculateHighestPRForRecordLift(loggedWorkouts = []) {
 function displayRecords(loggedWorkouts = [], workoutsList) {
     const theRecordWorkout = calculateHighestPRForRecordLift(loggedWorkouts);
     if (!theRecordWorkout || Object.keys(theRecordWorkout).length === 0) {
-        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data</span></p>`;
+        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data yet</span></p>`;
         return;
     }
     
     // Get the most improved exercise name
     const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
     if (!mostImprovedLift) {
-        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data</span></p>`;
+        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data yet</span></p>`;
         return;
     }
     
     // Get the record for that specific exercise
     const recordForExercise = theRecordWorkout[mostImprovedLift.exercise];
     if (!recordForExercise) {
-        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data</span></p>`;
+        workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data yet</span></p>`;
         return;
     }
     
@@ -496,80 +519,84 @@ function getWeekRange(dateStr) {
 
 // chart
 
-const ctx = document.getElementById('myChart');
-// let xValues = [];
-//const yValues = [calculatePRPerExerciseForRecordLift(workouts)];
-const currentDate = new Date();
-const currentMonthStart = getStartOfCurrentMonth(currentDate);
-const currentMonthEnd = getEndOfCurrentMonth(currentDate);
-const earliestDate = workouts[0].date;
-const earliestWeek = getStartOfWeek(earliestDate);
-const startingLastMonth = getStartOfLastMonth(currentDate);
-const startingLastWeek = getStartOfWeek(startingLastMonth);
-//const latestWeek = getStartOfWeek(currentDate);
-//let current = new Date(startingLastWeek);
+if (workouts.length > 0) { // dont run chart code at all if no workouts
+    const ctx = document.getElementById('myChart');
+    // let xValues = [];
+    //const yValues = [calculatePRPerExerciseForRecordLift(workouts)];
+    const currentDate = new Date();
+    const currentMonthStart = getStartOfCurrentMonth(currentDate);
+    const currentMonthEnd = getEndOfCurrentMonth(currentDate);
+    let earliestDate, earliestWeek;
 
-const prData = calculatePRPerExerciseForRecordLift(workouts);
-const dataPoints = prData.map(pr => ({
-    x: new Date(pr.date),
-    y: pr.weight
-}));
+    earliestDate = workouts[0].date;
+    earliestWeek = getStartOfWeek(earliestDate);
 
-// Calculate min/max from all workouts, not just PRs
-const allWorkoutDates = workouts.map(w => parseWorkoutDate(w.date));
-const minDate = new Date(Math.min(...allWorkoutDates));
-const maxDate = new Date(Math.max(...allWorkoutDates));
-const prWeights = prData.map(pr => pr.weight);
-const minPR = Math.min(...prWeights);
-const maxPR = Math.max(...prWeights);
+    const startingLastMonth = getStartOfLastMonth(currentDate);
+    const startingLastWeek = getStartOfWeek(startingLastMonth);
+    //const latestWeek = getStartOfWeek(currentDate);
+    //let current = new Date(startingLastWeek);
 
-new Chart(ctx, {
-  type: 'line',
-  data: {
-    datasets: [{
-      label: 'PRs',
-      data: dataPoints,
-      backgroundColor: "#2963a3",
-      borderColor: "#2963a3",
-      showLine: true,
-      pointRadius: 5,
-      borderWidth: 1
-    }]
-  },
-  options: {
-    scales: {
-      x: {
-        type: 'time',
-        time: {
-          unit: 'week',
-          tooltipFormat: 'MM/dd/yyyy',
-          displayFormats: {
-            week: 'MM/dd'
-          }
+    const prData = calculatePRPerExerciseForRecordLift(workouts);
+    const dataPoints = prData.map(pr => ({
+        x: new Date(pr.date),
+        y: pr.weight
+    }));
+
+    // Calculate min/max from all workouts, not just PRs
+    const allWorkoutDates = workouts.map(w => parseWorkoutDate(w.date));
+    const minDate = new Date(Math.min(...allWorkoutDates));
+    const maxDate = new Date(Math.max(...allWorkoutDates));
+    const prWeights = prData.map(pr => pr.weight);
+    const minPR = Math.min(...prWeights);
+    const maxPR = Math.max(...prWeights);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+            label: 'PRs',
+            data: dataPoints,
+            backgroundColor: "#2963a3",
+            borderColor: "#2963a3",
+            showLine: true,
+            pointRadius: 5,
+            borderWidth: 1
+            }]
         },
-        min: minDate,
-        max: maxDate,
-        title: {
-          display: true,
-          text: 'Date'
+        options: {
+            scales: {
+            x: {
+                type: 'time',
+                time: {
+                unit: 'week',
+                tooltipFormat: 'MM/dd/yyyy',
+                displayFormats: {
+                    week: 'MM/dd'
+                }
+                },
+                min: minDate,
+                max: maxDate,
+                title: {
+                display: true,
+                text: 'Date'
+                }
+            },
+            y: {
+                beginAtZero: false,
+                min: Math.floor(minPR / 10) * 10 - 10,
+                max: Math.ceil(maxPR / 10) * 10 + 10,
+                title: {
+                display: true,
+                text: 'PR Weight'
+                },
+                ticks: {
+                    stepSize: 10
+                }
+            }
+            }
         }
-      },
-      y: {
-        beginAtZero: false,
-        min: Math.floor(minPR / 10) * 10 - 10,
-        max: Math.ceil(maxPR / 10) * 10 + 10,
-        title: {
-          display: true,
-          text: 'PR Weight'
-        },
-        ticks: {
-            stepSize: 10
-        }
-      }
-    }
-  }
-});
-
+    });      
+}
 addWorkoutForm.addEventListener('submit', addWorkout);
 deleteWorkoutForm.addEventListener('submit', deleteWorkout);
 
