@@ -427,7 +427,7 @@ function calculateTotalProgressIncrease(loggedWorkouts = []) {
         }
     });
 
-    if (lastMonthTotalVolume > 0) {
+    if (lastMonthTotalVolume > 0 && currentMonthTotalVolume > 0) {
         percentageIncrease = Number((((currentMonthTotalVolume - lastMonthTotalVolume) / lastMonthTotalVolume) * 100).toFixed(2));
     }
     return percentageIncrease;
