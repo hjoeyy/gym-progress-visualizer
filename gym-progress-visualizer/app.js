@@ -148,7 +148,7 @@ function calculatePersonalRecords(loggedWorkouts = []) {
         const {exercise, weight, reps, RIR } = workout;
         //console.log(exercise, weight, reps, RIR);
         const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
-        //console.log(oneRM);
+        //console.log(oneRM); 
 
         if (!prs[exercise] || oneRM > prs[exercise].oneRM) {
             prs[exercise] = { ...workout, oneRM};
@@ -335,7 +335,7 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
 function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
     const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
     if(!mostImprovedLift) {
-        workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>No Data yet</span></p>`;
+        workoutsList.innerHTML = `<p>Most Improved Lift (Monthly): <br><br><span>No Data yet</span></p>`;
         return;
     }
     workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (${mostImprovedLift.percentageIncrease > 0 ? '+' + mostImprovedLift.percentageIncrease.toFixed(1) : mostImprovedLift.percentageIncrease.toFixed(1)}%)</span></p>`;
@@ -404,8 +404,8 @@ function displayWeekStreak(loggedWorkouts = [], workoutsList) {
 }
 
 function calculateTotalProgressIncrease(loggedWorkouts = []) {
-    let lastMonthTotalVolume = 0;
-    let currentMonthTotalVolume = 0;
+    let lastMonthWorkouts = [];
+    let currentMonthWorkouts = [];
     let percentageIncrease = -Infinity;
     const currentDate = new Date();
     const lastMonthStart = getStartOfLastMonth(currentDate);
@@ -418,19 +418,38 @@ function calculateTotalProgressIncrease(loggedWorkouts = []) {
         const workoutDate = parseWorkoutDate(date);
         //console.log(workoutDate);
         if (workoutDate >= lastMonthStart && workoutDate <= lastMonthEnd) {
-            lastMonthTotalVolume += sets * reps * weight;
-            console.log("last month total volume: ", lastMonthTotalVolume);
+            lastMonthWorkouts.push(workout);
         }
         if (workoutDate >= currentMonthStart && workoutDate <= currentMonthEnd) {
-            currentMonthTotalVolume += sets * reps * weight;
-            console.log("current month total volume: ", currentMonthTotalVolume);
+            currentMonthWorkouts.push(workout);
         }
     });
 
-    if (lastMonthTotalVolume > 0 && currentMonthTotalVolume > 0) {
-        percentageIncrease = Number((((currentMonthTotalVolume - lastMonthTotalVolume) / lastMonthTotalVolume) * 100).toFixed(2));
+    const lastMonthBiggestPR = calculatePersonalRecords(lastMonthWorkouts);
+    const currentMonthBiggestPR = calculatePersonalRecords(currentMonthWorkouts);
+
+    console.log("Last: ", lastMonthBiggestPR);
+    console.log("Curr: ", currentMonthBiggestPR);
+    
+    let percentageDifferences = [];
+
+    Object.keys(lastMonthBiggestPR).forEach(workout => {
+        if(currentMonthBiggestPR[workout]) {
+            const lastMPR = lastMonthBiggestPR[workout].oneRM;
+            const currentMPR = currentMonthBiggestPR[workout].oneRM;
+            if(lastMPR > 0) {
+                const difference = Number((((currentMPR - lastMPR) / lastMPR) * 100).toFixed(2));
+                percentageDifferences.push(difference);
+            }
+        }
+    });
+    let avg = null;
+    console.log(percentageDifferences);
+    if (percentageDifferences.length > 0) {
+        const sum = percentageDifferences.reduce((a, b) => a + b, 0);
+        avg = sum / percentageDifferences.length;
     }
-    return percentageIncrease;
+    return avg;
 }
 
 function displayTotalProgressIncrease(loggedWorkouts = [], workoutsList) {
@@ -439,7 +458,7 @@ function displayTotalProgressIncrease(loggedWorkouts = [], workoutsList) {
         workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>No Data yet</span></p>`;
         return;
     }
-    workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>${progressIncrease > 0 ? '+' + progressIncrease : progressIncrease}%</span></p>`;
+    workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>${progressIncrease > 0 ? '+' + progressIncrease.toFixed(2) : progressIncrease.toFixed(2)}%</span></p>`;
 } 
 
 function calculatePRForRecordLift(loggedWorkouts = []) {
