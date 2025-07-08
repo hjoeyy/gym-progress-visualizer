@@ -270,9 +270,8 @@ function displayWeeklyVolumePerExercise(loggedWorkouts = [], workoutsList) {
 }
 
 function calculateMostImprovedLift(loggedWorkouts = []) {
-    const volumePerExerciseLastMonth = {};
-    const volumePerExerciseCurrentMonth = {};
-    const percentageIncreases = {};
+    const lastMonthWorkouts = [];
+    const thisMonthWorkouts = [];
     const currentDate = new Date();
     const lastMonthStart = getStartOfLastMonth(currentDate);
     const lastMonthEnd = getEndOfLastMonth(currentDate);
@@ -285,60 +284,56 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
         //console.log(exercise, sets, reps, weight, date);
 
         if (workoutDate >= lastMonthStart && workoutDate <= lastMonthEnd) {
-            const lastMonthTotalVolume = sets * reps * weight;
+            lastMonthWorkouts.push(workout);
             //console.log(lastMonthTotalVolume);
-
-            if (!volumePerExerciseLastMonth[exercise]) {
-                volumePerExerciseLastMonth[exercise] = { exercise, lastMonthTotalVolume: 0};
-            }
-            volumePerExerciseLastMonth[exercise].lastMonthTotalVolume += lastMonthTotalVolume;
         }
 
         if(workoutDate >= currentMonthStart && workoutDate <= currentMonthEnd) {
-            const currentMonthTotalVolume = sets * reps * weight;
             //console.log(currentMonthTotalVolume);
 
-            if (!volumePerExerciseCurrentMonth[exercise]) {
-                volumePerExerciseCurrentMonth[exercise] = { exercise, currentMonthTotalVolume: 0};
+            thisMonthWorkouts.push(workout);
+        }
+    });
+    const lastMonthPRs = calculatePersonalRecords(lastMonthWorkouts);
+    const thisMonthPRs = calculatePersonalRecords(thisMonthWorkouts);
+    let percentageDifferences = [];
+
+    Object.keys(lastMonthPRs).forEach(exercise => {
+        if (thisMonthPRs[exercise]) {
+            const currentMPR = thisMonthPRs[exercise].oneRM;
+            const lastMPR = lastMonthPRs[exercise].oneRM;
+
+            if (lastMPR > 0) {
+                const difference = Number((((currentMPR - lastMPR) / lastMPR) * 100).toFixed(2));
+                percentageDifferences.push({
+                    exercise: exercise,
+                    percent: difference
+                });
             }
-            volumePerExerciseCurrentMonth[exercise].currentMonthTotalVolume += currentMonthTotalVolume;
         }
     });
 
-    Object.keys(volumePerExerciseCurrentMonth).forEach(exercise => {
-        const currentMonthVolume = volumePerExerciseCurrentMonth[exercise].currentMonthTotalVolume;
-        const lastMonthVolume = volumePerExerciseLastMonth[exercise].lastMonthTotalVolume;
+    let avg = null;
+    let highestPercent = -Infinity;
+    let mostImproved = null;
 
-        if (lastMonthVolume > 0) {
-            const percentageIncrease = ((currentMonthVolume - lastMonthVolume) / lastMonthVolume) * 100;
-            percentageIncreases[exercise] = {
-                exercise,
-                percentageIncrease
-            };
+    for(let i = 0; i < percentageDifferences.length; i++) {
+        if (percentageDifferences[i].percent > highestPercent) {
+            mostImproved = percentageDifferences[i];
+            highestPercent = percentageDifferences[i].percent;
         }
-    });
-
-    let mostImprovedExercise = null;
-    let highestPercentage = -Infinity;
-
-
-    Object.values(percentageIncreases).forEach(exercise => {
-        if(exercise.percentageIncrease > highestPercentage) {
-            highestPercentage = exercise.percentageIncrease;
-            mostImprovedExercise = exercise;
-        }
-    });
-    
-    return mostImprovedExercise;
+    }
+    return mostImproved;
 }
 
 function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
     const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
+    console.log("M: ", mostImprovedLift);
     if(!mostImprovedLift) {
         workoutsList.innerHTML = `<p>Most Improved Lift (Monthly): <br><br><span>No Data yet</span></p>`;
         return;
     }
-    workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (${mostImprovedLift.percentageIncrease > 0 ? '+' + mostImprovedLift.percentageIncrease.toFixed(1) : mostImprovedLift.percentageIncrease.toFixed(1)}%)</span></p>`;
+    workoutsList.innerHTML = `<p>Most Improved Lift: <br><br><span>${mostImprovedLift.exercise} (${mostImprovedLift.percent > 0 ? '+' + mostImprovedLift.percent.toFixed(1) : mostImprovedLift.percent.toFixed(1)}%)</span></p>`;
 }
 
 function calculateWeekStreak(loggedWorkouts = []) {
@@ -427,9 +422,6 @@ function calculateTotalProgressIncrease(loggedWorkouts = []) {
 
     const lastMonthBiggestPR = calculatePersonalRecords(lastMonthWorkouts);
     const currentMonthBiggestPR = calculatePersonalRecords(currentMonthWorkouts);
-
-    console.log("Last: ", lastMonthBiggestPR);
-    console.log("Curr: ", currentMonthBiggestPR);
     
     let percentageDifferences = [];
 
@@ -444,7 +436,6 @@ function calculateTotalProgressIncrease(loggedWorkouts = []) {
         }
     });
     let avg = null;
-    console.log(percentageDifferences);
     if (percentageDifferences.length > 0) {
         const sum = percentageDifferences.reduce((a, b) => a + b, 0);
         avg = sum / percentageDifferences.length;
