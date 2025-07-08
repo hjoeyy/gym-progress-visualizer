@@ -452,6 +452,10 @@ function displayTotalProgressIncrease(loggedWorkouts = [], workoutsList) {
     workoutsList.innerHTML = `<p>Monthly Progress: <br><br> <span>${progressIncrease > 0 ? '+' + progressIncrease.toFixed(2) : progressIncrease.toFixed(2)}%</span></p>`;
 } 
 
+function storeWorkoutsByGroup(loggedWorkouts = []) {
+    const exerciseByGroup = Object.groupBy(loggedWorkouts, ({ exercise }) => exercise); // group the workouts by their exercise  
+    return exerciseByGroup;
+}
 function calculatePRForRecordLift(loggedWorkouts = []) {
     const theRecordLift = calculateMostImprovedLift(loggedWorkouts);
     if (!theRecordLift) {
@@ -501,6 +505,22 @@ function displayRecords(loggedWorkouts = [], workoutsList) {
     workoutsList.innerHTML = `<p>${recordForExercise.exercise}: 
     <span>${recordForExercise.weight} lbs x ${recordForExercise.reps} reps 
     (${recordForExercise.date}) with ${recordForExercise.RIR} RIR</span></p>`;
+}
+function calculatePRPerExercise(loggedWorkouts = []) {
+    const prs = [];
+    const groupedWorkouts = storeWorkoutsByGroup(loggedWorkouts);
+    console.log(groupedWorkouts);
+    const prLogs = {};
+    Object.entries(groupedWorkouts).forEach(([exercise, array]) => {
+        console.log("Array: ", array);
+        prLogs[exercise] = array.map(workout => {
+            const { weight, reps, RIR, date } = workout;
+            const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
+            return { date, oneRM };
+        });
+    });
+    //console.log(prLogs);
+    return prLogs;
 }
 
 function calculatePRPerExerciseForRecordLift(loggedWorkouts = []) {
