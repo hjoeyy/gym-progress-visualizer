@@ -63,7 +63,7 @@ function addWorkout(e) {
     displayMostImprovedLift(workouts, mostImprovedExercise);
     displayWeekStreak(workouts, bestWeekStreak);
     displayTotalProgressIncrease(workouts, totalProgressIncrease);
-    displayRecords(workouts, record);
+    displayAllRecords(workouts, record);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
     //console.log(testDate(workoutDate));
@@ -95,7 +95,7 @@ function deleteWorkout(e) {
     displayMostImprovedLift(workouts, mostImprovedExercise);
     displayWeekStreak(workouts, bestWeekStreak);
     displayTotalProgressIncrease(workouts, totalProgressIncrease);
-    displayRecords(workouts, record);
+    displayAllRecords(workouts, record);
     localStorage.setItem('workouts', JSON.stringify(workouts));
     console.log("localStorage after set:", localStorage.getItem('workouts'));
     this.reset();
@@ -328,7 +328,7 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
 
 function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
     const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
-    console.log("M: ", mostImprovedLift);
+    //console.log("M: ", mostImprovedLift);
     if(!mostImprovedLift) {
         workoutsList.innerHTML = `<p>Most Improved Lift (Monthly): <br><br><span>No Data yet</span></p>`;
         return;
@@ -481,6 +481,10 @@ function calculateHighestPRForRecordLift(loggedWorkouts = []) {
     return calculatePersonalRecords(recordLiftLogs);
 }
 
+function calculateHighestPRForAllLifts(loggedWorkouts = []) {
+    return calculatePersonalRecords(loggedWorkouts);
+}
+
 function displayRecords(loggedWorkouts = [], workoutsList) {
     const theRecordWorkout = calculateHighestPRForRecordLift(loggedWorkouts);
     if (!theRecordWorkout || Object.keys(theRecordWorkout).length === 0) {
@@ -506,13 +510,27 @@ function displayRecords(loggedWorkouts = [], workoutsList) {
     <span>${recordForExercise.weight} lbs x ${recordForExercise.reps} reps 
     (${recordForExercise.date}) with ${recordForExercise.RIR} RIR</span></p>`;
 }
+
+function displayAllRecords(loggedWorkouts = [], workoutsList) {
+    const allPRs = calculateHighestPRForAllLifts(loggedWorkouts);
+    if(!allPRs || Object.keys(allPRs).length === 0) {
+        workoutsList.innerHTML = `<p>Record Lifts: <br><br><span>No Data yet</span></p>`;
+    }
+
+    workoutsList.innerHTML = Object.values(allPRs).map(record => {
+        return `<p><b>${record.exercise}: </b> <span>${record.weight} lbs x ${record.reps} reps
+        (${record.date}) with ${record.RIR} RIR</span></p>`
+    }).join('');
+}
+
+
 function calculatePRPerExercise(loggedWorkouts = []) {
     const prs = [];
     const groupedWorkouts = storeWorkoutsByGroup(loggedWorkouts);
-    console.log(groupedWorkouts);
+    //console.log(groupedWorkouts);
     const prLogs = {};
     Object.entries(groupedWorkouts).forEach(([exercise, array]) => {
-        console.log("Array: ", array);
+        //console.log("Array: ", array);
         prLogs[exercise] = array.map(workout => {
             const { weight, reps, RIR, date } = workout;
             const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
@@ -551,6 +569,7 @@ function getWeekRange(dateStr) {
 
 if (workouts.length > 0) { // dont run chart code at all if no workouts
     const ctx = document.getElementById('myChart');
+    ctx.height = 350;
     // let xValues = [];
     //const yValues = [calculatePRPerExerciseForRecordLift(workouts)];
     const currentDate = new Date();
@@ -571,7 +590,28 @@ if (workouts.length > 0) { // dont run chart code at all if no workouts
         x: new Date(pr.date),
         y: pr.weight
     }));
+    const prLogs = calculatePRPerExercise(workouts);
 
+    const colors = [
+        "#2963a3", // blue
+        "#e67e22", // orange
+        "#27ae60", // green
+        "#8e44ad"  // purple
+      ];
+
+    const datasets = Object.entries(prLogs).map(([exercise, prArray], idx) => ({
+        label: exercise,
+        data: prArray.map(pr => ({
+            x: new Date(pr.date),
+            y: pr.oneRM
+        })),
+        backgroundColor: colors[idx % colors.length],
+        borderColor: colors[idx % colors.length],
+        showLine: true,
+        pointRadius: 5,
+        borderWidth: 1
+    }));
+    console.log("Datasets: ", datasets);
     // Calculate min/max from all workouts, not just PRs
     const allWorkoutDates = workouts.map(w => parseWorkoutDate(w.date));
     const minDate = new Date(Math.min(...allWorkoutDates));
@@ -583,15 +623,7 @@ if (workouts.length > 0) { // dont run chart code at all if no workouts
     new Chart(ctx, {
         type: 'line',
         data: {
-            datasets: [{
-            label: 'PRs',
-            data: dataPoints,
-            backgroundColor: "#2963a3",
-            borderColor: "#2963a3",
-            showLine: true,
-            pointRadius: 5,
-            borderWidth: 1
-            }]
+            datasets: datasets
         },
         options: {
             scales: {
@@ -613,14 +645,14 @@ if (workouts.length > 0) { // dont run chart code at all if no workouts
             },
             y: {
                 beginAtZero: false,
-                min: Math.floor(minPR / 10) * 10 - 10,
-                max: Math.ceil(maxPR / 10) * 10 + 10,
+                min: Math.floor(minPR / 100) * 100 - 100,
+                max: Math.ceil(maxPR / 100) * 100 + 100,
                 title: {
                 display: true,
                 text: 'PR Weight'
                 },
                 ticks: {
-                    stepSize: 10
+                    stepSize: 100
                 }
             }
             }
@@ -637,7 +669,7 @@ displayTotalWorkouts(workouts, totalWorkoutsLogged);
 displayMostImprovedLift(workouts, mostImprovedExercise);
 displayWeekStreak(workouts, bestWeekStreak);
 displayTotalProgressIncrease(workouts, totalProgressIncrease);
-displayRecords(workouts, record);
+displayAllRecords(workouts, record);
 
 
 

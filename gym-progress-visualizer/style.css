@@ -53,6 +53,10 @@
     font-size: 24px;
 }
 
+.statistics-card .record p {
+    font-size: 16px;
+}
+
 .lifts, .lifts-two {
     padding: 0 20px;
     margin: 0;
