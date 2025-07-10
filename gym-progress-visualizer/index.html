@@ -18,7 +18,7 @@
                 <h1>GYM PROGRESS VISUALIZER</h1>
             </div>
             <div class="theme-button">
-                <button type="button"><img src="assets/white-moon.png" alt="moon" class="moon-img" width=20 height=20 /></button>
+                <button onclick="toggleMode()" type="button"><img src="assets/white-moon.png" alt="moon" class="moon-img" width=20 height=20 /></button>
             </div>
         </nav>
     </header>
@@ -55,75 +55,79 @@
                     </div>
                 </div>
                 <div class="workout-cards">
-                    <div class="statistics-card">
-                        <div class="add-workout-form">
-                            <form class="workout-form" action="#" method="post">
-                                <h3>Add Workout</h3>
-                                <div class="bigger-stats">
-                                    <p>
-                                        <input type="text" value="Date" class="date" id="workout-date" name="workout-date" />
-                                    </p>
-                                    <p>
-                                        <!--<input type="text" placeholder="Exercise" id="workout-exercise" name="workout-exercise" class="exercise"/>-->
-                                        <select name="exercise" id="workout-exercise" class="exercises">
-                                            <option value="" class="placeholder">Exercise</option>
-                                            <option value="bench-press">Bench Press</option>
-                                            <option value="squat">Squat</option>
-                                            <option value="deadlift">Deadlift</option>
-                                            <option value="overhead-press">Overhead Press</option>
-                                        </select>
-                                    </p>
+                    <div class="workout-cards-stacked">
+                        <div class="workout-changes">
+                            <div class="statistics-card">
+                                <div class="add-workout-form">
+                                    <form class="workout-form" action="#" method="post">
+                                        <h3>Add Workout</h3>
+                                        <div class="bigger-stats">
+                                            <p>
+                                                <input type="text" value="Date" class="date" id="workout-date" name="workout-date" />
+                                            </p>
+                                            <p>
+                                                <!--<input type="text" placeholder="Exercise" id="workout-exercise" name="workout-exercise" class="exercise"/>-->
+                                                <select name="exercise" id="workout-exercise" class="exercises">
+                                                    <option value="" class="placeholder">Exercise</option>
+                                                    <option value="bench-press">Bench Press</option>
+                                                    <option value="squat">Squat</option>
+                                                    <option value="deadlift">Deadlift</option>
+                                                    <option value="overhead-press">Overhead Press</option>
+                                                </select>
+                                            </p>
+                                        </div>
+                                        <div class="smaller-stats">
+                                            <p>
+                                                <input type="number" placeholder="Sets" id="workout-sets" name="workout-sets" />
+                                            </p>
+                                            <p>
+                                                <input type="number" placeholder="Reps" id="workout-reps" name="workout-reps" />
+                                            </p>
+                                            <p>
+                                                <input type="number" placeholder="Weight" id="workout-weight" name="workout-weight" />
+                                            </p>
+                                            <p>
+                                                <input type="number" placeholder="RIR" id="reps-in-reserve" name="workout-rir" />
+                                            </p>
+                                        </div>
+                                        <input class="submit-button" type="submit" value="Add Workout">
+                                        <div id="errorMessage" class="error-message"></div>
+                                    </form>
                                 </div>
-                                <div class="smaller-stats">
-                                    <p>
-                                        <input type="number" placeholder="Sets" id="workout-sets" name="workout-sets" />
-                                    </p>
-                                    <p>
-                                        <input type="number" placeholder="Reps" id="workout-reps" name="workout-reps" />
-                                    </p>
-                                    <p>
-                                        <input type="number" placeholder="Weight" id="workout-weight" name="workout-weight" />
-                                    </p>
-                                    <p>
-                                        <input type="number" placeholder="RIR" id="reps-in-reserve" name="workout-rir" />
-                                    </p>
+                            </div>
+                            <div class="statistics-card">
+                                <h3>Delete Workout</h3>
+                                <div class="delete-wrap"></div>
+                                    <form class="delete-workout-form">
+                                        <input type="number" placeholder="Workout #" id="workout-number" name="workout-number" class="workout-number"/>
+                                        <input class="submit-button" type="submit" value="Delete Workout">
+                                    </form>
                                 </div>
-                                <input class="submit-button" type="submit" value="Add Workout">
-                                <div id="errorMessage" class="error-message"></div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
-                    <div class="statistics-card">
-                        <h3>Records</h3>
-                        <p class="record"></p>
-                        <!-- <p class="record">Bench Press <span>225 lbs x 5 reps (06/20/2025)</span></p> -->
-                        <div class="records-graph">
-                            <canvas id="myChart"></canvas>
-                        </div>
-                        <!-- <div class="y-axis">
-                            <ul>
-                                <li>220</li>
-                                <li>200</li>
-                                <li>180</li>
-                            </ul>
-                        </div>
-                        <div class="x-axis">
-                            <ul>
-                                <li>06/02</li>
-                                <li>06/09</li>
-                                <li>06/16</li>
-                                <li>06/23</li>
-                                <li>06/30</li>
-                            </ul>
-                        </div> -->
-                    </div>
-                    <div class="statistics-card">
-                        <h3>Delete Workout</h3>
-                        <div class="delete-wrap"></div>
-                            <form class="delete-workout-form">
-                                <input type="number" placeholder="Workout #" id="workout-number" name="workout-number" class="workout-number"/>
-                                <input class="submit-button" type="submit" value="Delete Workout">
-                            </form>
+                        <div class="statistics-card records-card">
+                            <h3>Records</h3>
+                            <p class="record"></p>
+                            <!-- <p class="record">Bench Press <span>225 lbs x 5 reps (06/20/2025)</span></p> -->
+                            <div class="records-graph">
+                                <canvas id="myChart"></canvas>
+                            </div>
+                            <!-- <div class="y-axis">
+                                <ul>
+                                    <li>220</li>
+                                    <li>200</li>
+                                    <li>180</li>
+                                </ul>
+                            </div>
+                            <div class="x-axis">
+                                <ul>
+                                    <li>06/02</li>
+                                    <li>06/09</li>
+                                    <li>06/16</li>
+                                    <li>06/23</li>
+                                    <li>06/30</li>
+                                </ul>
+                            </div> -->
                         </div>
                     </div>
                 </div>

@@ -16,6 +16,12 @@
     padding: 10px;
 }
 
+.dark-mode {
+    background-color: #121212;
+    color: white;
+}
+
+
 .welcome {
     padding: 30px 0 30px 130px;
 }
@@ -69,15 +75,55 @@
 .workout-cards {
     display: flex;
     justify-content: center;
-    align-items: start;
+    align-items: center;
     flex-wrap: wrap;
     padding: 20px 0;
     gap: 20px;
 }
 
-.workout-cards .statistics-card {
+/* .workout-cards .statistics-card {
     flex: 0 1 calc(100% / 3 - 20px); /* 3 cards per row, minus gap */
-    max-width: calc(100% / 3 - 20px);
+   /* max-width: calc(100% / 3 - 20px);
+} */
+
+
+.workout-changes {
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    max-width: 350px;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.workout-changes .statistics-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.records-card {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    max-width: 500px;
+}
+
+.records-graph {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: flex;
+    align-items: stretch;
+}
+
+.records-graph canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
 }
 
 .add-workout-form {
@@ -151,46 +197,6 @@ p.lighter-text {
     font-weight: normal;
 }
 
-/* #myChart {
-    width: 100% !important;
-    max-width: 400px;
-    height: 300px !important;
-    display: block;
-    margin: 0 auto;
-} */
-/* .y-axis ul {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    justify-content: left;
-    align-items: start;
-    padding: 0;
-    padding-left: 10px;
-}
-
-.y-axis li {
-    font-weight: normal;
-    color: gray;
-    font-size: 12px;
-}
-
-.x-axis ul {
-    display: flex;
-    gap: 20px;
-    justify-content: left;
-    align-items: start;
-    padding: 0;
-    padding-left: 40px;
-}
-
-.x-axis li {
-    font-weight: normal;
-    color: gray;
-    font-size: 12px;
-} */
-
-
-
 .delete-wrap {
     display: flex;
     flex-direction: column;
@@ -261,6 +267,11 @@ tr:last-child {
     padding: 20px;
 }
 
+.dark-mode-statistics {
+    background-color: #242424;
+    color: #f5f5f5;
+}
+
 .summary-stats {
     display: flex;
     flex-direction: column;
@@ -302,4 +313,8 @@ tr:last-child {
 .footer-container h3 {
     text-align: center;
     color: #2963a3;
+}
+
+.dark-mode-footer {
+    background-color: #242424;
 }

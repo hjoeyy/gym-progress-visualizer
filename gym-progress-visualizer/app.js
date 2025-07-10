@@ -34,8 +34,13 @@ const bestWeekStreak = document.querySelector('.best-week-streak');
 const totalProgressIncrease = document.querySelector('.total-progress-increase');
 const deleteWorkoutForm = document.querySelector('.delete-workout-form');
 const record = document.querySelector('.record');
-const darkMode = document.querySelector('.dark-mode');
-const lightMode = document.querySelector('body');
+
+if (localStorage.getItem('darkMode') === 'enabled') {
+    document.body.classList.add('dark-mode');
+    const modeFooter = document.querySelector('.footer-container');
+    if (modeFooter) modeFooter.classList.add('dark-mode-footer');
+    document.querySelectorAll('.statistics-card').forEach(card => card.classList.add('dark-mode-statistics'));
+}
 
 function displayError(message) {
     errorMessage.textContent = message;
@@ -45,7 +50,16 @@ function displayError(message) {
 }
 
 function toggleMode() {
-    darkMode.classList.toggle('dark-mode');
+    const mode = document.body;
+    const modeFooter = document.querySelector('.footer-container');
+    const statCards = document.querySelectorAll('.statistics-card');
+    const isDark = mode.classList.contains('dark-mode');
+    
+    mode.classList.toggle('dark-mode');
+    modeFooter.classList.toggle('dark-mode-footer');
+    statCards.forEach(card => card.classList.toggle('dark-mode-statistics'));
+
+    localStorage.setItem('darkMode', isDark ? 'disabled' : 'enabled');
 }
 
 function addWorkout(e) {
@@ -278,7 +292,7 @@ function displayWeeklyVolumePerExercise(loggedWorkouts = [], workoutsList) {
     }
     workoutsList.innerHTML = Object.values(volumePerExercise).map(volume => {
         return `<li>${volume.exercise}: <span>${volume.totalVolume.toFixed(1)} lbs</span></li>`;
-    }).join();
+    }).join('');
 }
 
 function calculateMostImprovedLift(loggedWorkouts = []) {
