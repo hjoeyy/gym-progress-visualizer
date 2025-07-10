@@ -1,4 +1,5 @@
 const re = /^(?:\d{2})([/])\d{2}\1\d{4}$/;
+let myChart = null;
 
 function testDate(dateInput) {
     console.log("date received: ", dateInput);
@@ -10,7 +11,15 @@ function testDate(dateInput) {
 
         throw new Error("Invalid Date Format! Please use MM/DD/YYYY");
     }
+    const currentDate = new Date();
+    const parseDate = parseWorkoutDate(dateInput);
+
+    if(parseDate > currentDate) {
+        displayError("Hey! You can't go into the future! Please enter a past or the current date");
+        throw new Error("Hey! You can't go into the future! Please enter a past or the current date");
+    }
 }
+
 
 const addWorkoutForm = document.querySelector('.workout-form');
 const workoutDate = document.querySelector('#workout-date');
@@ -25,12 +34,18 @@ const bestWeekStreak = document.querySelector('.best-week-streak');
 const totalProgressIncrease = document.querySelector('.total-progress-increase');
 const deleteWorkoutForm = document.querySelector('.delete-workout-form');
 const record = document.querySelector('.record');
+const darkMode = document.querySelector('.dark-mode');
+const lightMode = document.querySelector('body');
 
 function displayError(message) {
     errorMessage.textContent = message;
     setTimeout(() => {
         errorMessage.textContent = '';
     }, 5000);
+}
+
+function toggleMode() {
+    darkMode.classList.toggle('dark-mode');
 }
 
 function addWorkout(e) {
@@ -64,10 +79,9 @@ function addWorkout(e) {
     displayWeekStreak(workouts, bestWeekStreak);
     displayTotalProgressIncrease(workouts, totalProgressIncrease);
     displayAllRecords(workouts, record);
+    renderChart();
     localStorage.setItem('workouts', JSON.stringify(workouts));
     this.reset();
-    //console.log(testDate(workoutDate));
-    //console.log("WOOW!");
 }
 
 function deleteWorkout(e) {
@@ -84,10 +98,8 @@ function deleteWorkout(e) {
         return;
     }
 
-    console.log("Before delete:", JSON.stringify(workouts));
     workouts.splice(workoutNumber - 1, 1); // because we put the number ahead by 1, index is behind by 1 due to that
     reassignWorkoutNumbers(workouts);
-    console.log("After delete:", JSON.stringify(workouts));
     populateTable(workouts, workoutTableBody);
     displayPersonalRecords(workouts, lifts);
     displayWeeklyVolumePerExercise(workouts, liftsTwo);
@@ -96,8 +108,8 @@ function deleteWorkout(e) {
     displayWeekStreak(workouts, bestWeekStreak);
     displayTotalProgressIncrease(workouts, totalProgressIncrease);
     displayAllRecords(workouts, record);
+    renderChart();
     localStorage.setItem('workouts', JSON.stringify(workouts));
-    console.log("localStorage after set:", localStorage.getItem('workouts'));
     this.reset();
 }
 
@@ -279,18 +291,14 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
     const currentMonthEnd = getEndOfCurrentMonth(currentDate);
 
     loggedWorkouts.forEach(workout => {
-        const { exercise, sets, reps, weight, date } = workout;
+        const { date } = workout;
         const workoutDate = parseWorkoutDate(date);
-        //console.log(exercise, sets, reps, weight, date);
 
         if (workoutDate >= lastMonthStart && workoutDate <= lastMonthEnd) {
             lastMonthWorkouts.push(workout);
-            //console.log(lastMonthTotalVolume);
         }
 
         if(workoutDate >= currentMonthStart && workoutDate <= currentMonthEnd) {
-            //console.log(currentMonthTotalVolume);
-
             thisMonthWorkouts.push(workout);
         }
     });
@@ -328,7 +336,6 @@ function calculateMostImprovedLift(loggedWorkouts = []) {
 
 function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
     const mostImprovedLift = calculateMostImprovedLift(loggedWorkouts);
-    //console.log("M: ", mostImprovedLift);
     if(!mostImprovedLift) {
         workoutsList.innerHTML = `<p>Most Improved Lift (Monthly): <br><br><span>No Data yet</span></p>`;
         return;
@@ -338,11 +345,6 @@ function displayMostImprovedLift(loggedWorkouts = [], workoutsList) {
 
 function calculateWeekStreak(loggedWorkouts = []) {
 
-    // const allWorkoutDates = parseWorkoutDate(loggedWorkouts.date);
-    // loggedWorkouts.sort(allWorkoutDates.getTime());
-    // const datesArray = loggedWorkouts.map(workout => workout.date);
-    // datesArray.sort();
-
     if (!loggedWorkouts.length) return 0;
     const currentDate = new Date();
     const weeklyGroups = {};
@@ -351,13 +353,11 @@ function calculateWeekStreak(loggedWorkouts = []) {
     const sortedWorkoutsByDate = loggedWorkouts.sort((a, b) => parseWorkoutDate(a.date) - parseWorkoutDate(b.date)); // sorts all workouts by date
     const earliestDate = sortedWorkoutsByDate[0].date;
 
-    //const groupWorkoutsByWeek = sortedWorkoutsByDate.map(workout => getStartOfWeek(parseWorkoutDate(workout.date).toISOString()));
     sortedWorkoutsByDate.forEach(workout => {
         const { date } = workout;
         const workoutDate = parseWorkoutDate(date);
         const weekKey = getStartOfWeek(workoutDate).toISOString().split('T')[0]; // identifier to group elements by week
 
-        // console.log('Checking workout date:', workoutDate, 'for exercise:', exercise, 'day of week: ', workoutDate.getDay());
         if (!weeklyGroups[weekKey]) {
             weeklyGroups[weekKey] = [];
         }
@@ -366,8 +366,6 @@ function calculateWeekStreak(loggedWorkouts = []) {
 
     let weekStreak = 0;
     const earliestWeek = getStartOfWeek(earliestDate);
-    //const latestWeek = getStartOfWeek(currentDate);
-    //latestWeek.setDate(latestWeek.getDate() - 7); // go back one week to check the previous week to keep current week streak
     let current = new Date(earliestWeek);
     const currentWeekKey = getStartOfWeek(currentDate).toISOString().split('T')[0];
     const isWorkoutThisWeek = weeklyGroups[currentWeekKey] && weeklyGroups[currentWeekKey].length > 0;
@@ -386,10 +384,8 @@ function calculateWeekStreak(loggedWorkouts = []) {
         else {
             weekStreak = 0; // the moment there isn't reset the streak
         }
-        //console.log(weekStreak);
         current.setDate(current.getDate() + 7);
     }
-    //console.log(weeklyGroups);
     return weekStreak;
 }
 
@@ -409,9 +405,8 @@ function calculateTotalProgressIncrease(loggedWorkouts = []) {
     const currentMonthEnd = getEndOfCurrentMonth(currentDate);
 
     loggedWorkouts.forEach(workout => {
-        const { date, sets, reps, weight } = workout;
+        const { date } = workout;
         const workoutDate = parseWorkoutDate(date);
-        //console.log(workoutDate);
         if (workoutDate >= lastMonthStart && workoutDate <= lastMonthEnd) {
             lastMonthWorkouts.push(workout);
         }
@@ -471,15 +466,15 @@ function calculatePRForRecordLift(loggedWorkouts = []) {
     return recordLiftLogs;
 }
 
-function calculateLowestPRForRecordLift(loggedWorkouts = []) {
-    const recordLiftLogs = calculatePRForRecordLift(loggedWorkouts);
-    return calculateLowestPersonalRecords(recordLiftLogs);
-}
+// function calculateLowestPRForRecordLift(loggedWorkouts = []) {
+//     const recordLiftLogs = calculatePRForRecordLift(loggedWorkouts);
+//     return calculateLowestPersonalRecords(recordLiftLogs);
+// }
 
-function calculateHighestPRForRecordLift(loggedWorkouts = []) {
-    const recordLiftLogs = calculatePRForRecordLift(loggedWorkouts);
-    return calculatePersonalRecords(recordLiftLogs);
-}
+// function calculateHighestPRForRecordLift(loggedWorkouts = []) {
+//     const recordLiftLogs = calculatePRForRecordLift(loggedWorkouts);
+//     return calculatePersonalRecords(recordLiftLogs);
+// }
 
 function calculateHighestPRForAllLifts(loggedWorkouts = []) {
     return calculatePersonalRecords(loggedWorkouts);
@@ -527,17 +522,14 @@ function displayAllRecords(loggedWorkouts = [], workoutsList) {
 function calculatePRPerExercise(loggedWorkouts = []) {
     const prs = [];
     const groupedWorkouts = storeWorkoutsByGroup(loggedWorkouts);
-    //console.log(groupedWorkouts);
     const prLogs = {};
     Object.entries(groupedWorkouts).forEach(([exercise, array]) => {
-        //console.log("Array: ", array);
         prLogs[exercise] = array.map(workout => {
             const { weight, reps, RIR, date } = workout;
             const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
             return { date, oneRM };
         });
     });
-    //console.log(prLogs);
     return prLogs;
 }
 
@@ -567,29 +559,19 @@ function getWeekRange(dateStr) {
 
 // chart
 
-if (workouts.length > 0) { // dont run chart code at all if no workouts
+function renderChart() {
+    if (!workouts.length) return; // dont run chart code at all if no workouts
+   
     const ctx = document.getElementById('myChart');
     ctx.height = 350;
-    // let xValues = [];
-    //const yValues = [calculatePRPerExerciseForRecordLift(workouts)];
+
     const currentDate = new Date();
-    const currentMonthStart = getStartOfCurrentMonth(currentDate);
-    const currentMonthEnd = getEndOfCurrentMonth(currentDate);
     let earliestDate, earliestWeek;
 
     earliestDate = workouts[0].date;
     earliestWeek = getStartOfWeek(earliestDate);
 
-    const startingLastMonth = getStartOfLastMonth(currentDate);
-    const startingLastWeek = getStartOfWeek(startingLastMonth);
-    //const latestWeek = getStartOfWeek(currentDate);
-    //let current = new Date(startingLastWeek);
-
     const prData = calculatePRPerExerciseForRecordLift(workouts);
-    const dataPoints = prData.map(pr => ({
-        x: new Date(pr.date),
-        y: pr.weight
-    }));
     const prLogs = calculatePRPerExercise(workouts);
 
     const colors = [
@@ -597,7 +579,7 @@ if (workouts.length > 0) { // dont run chart code at all if no workouts
         "#e67e22", // orange
         "#27ae60", // green
         "#8e44ad"  // purple
-      ];
+        ];
 
     const datasets = Object.entries(prLogs).map(([exercise, prArray], idx) => ({
         label: exercise,
@@ -620,7 +602,10 @@ if (workouts.length > 0) { // dont run chart code at all if no workouts
     const minPR = Math.min(...prWeights);
     const maxPR = Math.max(...prWeights);
 
-    new Chart(ctx, {
+    if(myChart) {
+        myChart.destroy();
+    }
+    myChart = new Chart(ctx, {
         type: 'line',
         data: {
             datasets: datasets
@@ -659,8 +644,11 @@ if (workouts.length > 0) { // dont run chart code at all if no workouts
         }
     });      
 }
+
+
 addWorkoutForm.addEventListener('submit', addWorkout);
 deleteWorkoutForm.addEventListener('submit', deleteWorkout);
+
 
 populateTable(workouts, workoutTableBody);
 displayPersonalRecords(workouts, lifts);
@@ -670,6 +658,7 @@ displayMostImprovedLift(workouts, mostImprovedExercise);
 displayWeekStreak(workouts, bestWeekStreak);
 displayTotalProgressIncrease(workouts, totalProgressIncrease);
 displayAllRecords(workouts, record);
+renderChart();
 
 
 
