@@ -1,3 +1,7 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 .navbar {
   background-color: #2963a3;
   display: flex;
@@ -312,109 +316,138 @@ input, .exercises {
   justify-content: center;
   align-items: center;
   gap: 20px;
-  
-}
 
-@media (max-width: 480px) {
-  .workout-log-cards {
+  @media (max-width: 480px) {
     flex-direction: column;
   }
-}
-.workout-log-cards .statistics-card {
-  padding: 20px 0;
-  padding-bottom: 10px;
-}
 
-.table-caption {
-  font-weight: bold;
-  text-align: start;
-  padding-left: 30px;
-  padding-bottom: 10px;
-  padding-top: 10px;
-  font-size: 1em;
-}
+  .statistics-card {
+    padding: 20px 0;
+    padding-bottom: 10px;
 
-@media (max-width: 480px) {
-  .workout-log-cards .statistics-card {
-    max-width: 100%;
-    padding: 0 2vw;
-    box-sizing: border-box;
+    .table-caption {
+      font-weight: bold;
+      text-align: start;
+      padding-left: 30px;
+      padding-bottom: 10px;
+      padding-top: 10px;
+      font-size: 1em;
+    }
+
+    
+    @media (max-width: 480px) {
+      max-width: 100%;
+      padding: 0 2vw;
+      box-sizing: border-box;
+
+      h3 {
+        padding-top: 30px;
+      }
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      max-width: 100%;
+      .logged-workouts {
+        min-width: 450px;
+        width: 100%;
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .table-responsive {
+        width: 100vw;
+        max-width: 100vw;
+      }
+      .logged-workouts {
+        min-width: 450px;
+        font-size: 16px;
+      }
+      .statistics-card,
+      .workout-log-cards {
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: 0;
+        margin-right: 0;
+      }
+    }
+
+    .table-responsive {
+      @media (max-width: 480px) {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .logged-workouts {
+        @media (max-width: 480px) {
+          width: 100%;
+          min-width: 450px;
+          font-size: 16px;
+        }
+      }
+      table {
+        border-collapse: collapse;
+
+        thead tr:first-child {
+          border-top: none;
+        }
+
+        th, td {
+          padding: 8px;
+        }
+
+        tr {
+          border: solid lightgray;
+          border-width: 1px 0;
+        }
+
+        tr:last-child {
+          border-bottom: none;
+        }
+        
+      }
+    }
   }
-  .workout-log-cards .statistics-card h3 {
-    padding-top: 30px;
+}
+
+
+
+
+
+
+
+
+.statistics-card {
+  .summary-stats {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    gap: 20px;
+
+    .summary-stat {
+      display: flex;
+      justify-content: start;
+      align-items: start;
+      gap: 10px;
+
+      p {
+        font-size: 16px;
+      }
+
+      img {
+        text-align: start;
+      }
+    }
   }
-  .table-responsive {
-    width: 100%;
-    overflow-x: auto;
-  }
-  .table-responsive .logged-workouts caption {
-    overflow-x: visible;
-  }
-  .logged-workouts {
-    width: 100%;
-    min-width: 450px;
-    font-size: 16px;
-  }
-}
-table {
-  border-collapse: collapse;
 }
 
-caption {
-  font-weight: bold;
-  text-align: start;
-  padding-left: 30px;
-  padding-bottom: 10px;
-}
-
-thead tr:first-child {
-  border-top: none;
-}
-
-th, td {
-  padding: 8px;
-}
-
-tr {
-  border: solid lightgray;
-  border-width: 1px 0;
-}
-
-tr:last-child {
-  border-bottom: none;
-}
-
-.statistics-card .summary-stats {
-  padding: 20px;
-}
 
 .dark-mode-statistics {
   background-color: #242424;
   color: #f5f5f5;
-}
-
-.summary-stats {
-  display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-items: center;
-  gap: 20px;
-}
-
-.summary-stat {
-  display: flex;
-  justify-content: start;
-  align-items: start;
-  gap: 10px;
-}
-
-.summary-stat p {
-  font-size: 16px;
-  font-weight: normal;
-}
-
-.summary-stat img {
-  text-align: start;
 }
 
 .social-media-links {
@@ -429,11 +462,11 @@ tr:last-child {
   background-color: #ffffff;
   border-top: 1px solid lightgray;
   padding: 40px;
-}
 
-.footer-container h3 {
-  text-align: center;
-  color: #2963a3;
+  h3 {
+    text-align: center;
+    color: #2963a3;
+  }
 }
 
 .dark-mode-footer {
@@ -441,3 +474,9 @@ tr:last-child {
 }
 
 /*# sourceMappingURL=style.scss.map */
+
+.statistics-card.dark-mode-statistics {
+  background-color: #242424 !important;
+  color: #f5f5f5 !important;
+}
+
