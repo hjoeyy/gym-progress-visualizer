@@ -37,21 +37,12 @@
                     </div>
                     <div class="statistics-card">
                         <h3>All-Time PRs</h3>
-                        <ul class="lifts">
-                            <!-- <li>Bench: <span>225 lbs</span></li>
-                            <li>Squat: <span>315 lbs</span></li>
-                            <li>Deadlift: <span>365 lbs</span></li>
-                            <li>OHP: <span>165 lbs</span></li> -->
-                        </ul>
+                        <ul class="lifts"></ul>
                         <p class="no-data"></p>
                     </div>
                     <div class="statistics-card">
                         <h3>This Week's Volume</h3>
-                        <!-- <p>7,000 lbs</p> -->
-                        <ul class="lifts-two">
-                            <!-- <li>Squat: <span>355.8 lbs</span></li>
-                            <li>Bench: <span>252.8 lbs</span></li> -->
-                        </ul>
+                        <ul class="lifts-two"></ul>
                     </div>
                 </div>
                 <div class="workout-cards">
@@ -63,11 +54,11 @@
                                         <h3>Add Workout</h3>
                                         <div class="bigger-stats">
                                             <p>
-                                                <input type="text" value="Date" class="date" id="workout-date" name="workout-date" />
+                                                <input type="text" value="Date" class="date" id="workout-date" name="workout-date" required />
                                             </p>
                                             <p>
                                                 <!--<input type="text" placeholder="Exercise" id="workout-exercise" name="workout-exercise" class="exercise"/>-->
-                                                <select name="exercise" id="workout-exercise" class="exercises">
+                                                <select name="exercise" id="workout-exercise" class="exercises" required>
                                                     <option value="" class="placeholder">Exercise</option>
                                                     <option value="bench-press">Bench Press</option>
                                                     <option value="squat">Squat</option>
@@ -78,16 +69,16 @@
                                         </div>
                                         <div class="smaller-stats">
                                             <p>
-                                                <input type="number" placeholder="Sets" id="workout-sets" name="workout-sets" />
+                                                <input type="number" placeholder="Sets" id="workout-sets" name="workout-sets" required />
                                             </p>
                                             <p>
-                                                <input type="number" placeholder="Reps" id="workout-reps" name="workout-reps" />
+                                                <input type="number" placeholder="Reps" id="workout-reps" name="workout-reps" required />
                                             </p>
                                             <p>
-                                                <input type="number" placeholder="Weight" id="workout-weight" name="workout-weight" />
+                                                <input type="number" placeholder="Weight" id="workout-weight" name="workout-weight" required />
                                             </p>
                                             <p>
-                                                <input type="number" placeholder="RIR" id="reps-in-reserve" name="workout-rir" />
+                                                <input type="number" placeholder="RIR" id="reps-in-reserve" name="workout-rir" required />
                                             </p>
                                         </div>
                                         <input class="submit-button" type="submit" value="Add Workout">
@@ -101,6 +92,7 @@
                                     <form class="delete-workout-form">
                                         <input type="number" placeholder="Workout #" id="workout-number" name="workout-number" class="workout-number"/>
                                         <input class="submit-button" type="submit" value="Delete Workout">
+                                        <div id="deleteErrorMessage" class="delete-error-message"></div>
                                     </form>
                                 </div>
                             </div>
@@ -108,92 +100,77 @@
                         <div class="statistics-card records-card">
                             <h3>Records</h3>
                             <p class="record"></p>
-                            <!-- <p class="record">Bench Press <span>225 lbs x 5 reps (06/20/2025)</span></p> -->
                             <div class="records-graph">
                                 <canvas id="myChart"></canvas>
                             </div>
-                            <!-- <div class="y-axis">
-                                <ul>
-                                    <li>220</li>
-                                    <li>200</li>
-                                    <li>180</li>
-                                </ul>
-                            </div>
-                            <div class="x-axis">
-                                <ul>
-                                    <li>06/02</li>
-                                    <li>06/09</li>
-                                    <li>06/16</li>
-                                    <li>06/23</li>
-                                    <li>06/30</li>
-                                </ul>
-                            </div> -->
                         </div>
                     </div>
                 </div>
                 <div class="workout-log-cards">
                     <div class="statistics-card">
-                        <table class="logged-workouts">
-                            <caption>Most Recent Workout Logs</caption>
-                            <thead>
-                                <tr>
-                                    <th>Workout #</th>
-                                    <th>Date</th>
-                                    <th>Exercise</th>
-                                    <th>Sets</th>
-                                    <th>Reps</th>
-                                    <th>Weight</th>
-                                    <th>RIR</th>
-                                </tr>
-                            </thead>
-                            <tbody class="individual-workouts">
-
-                            </tbody>
-                            <!-- <tbody>
-                                <tr>
-                                    <td>06/02/2025</td>
-                                    <td>Bench Press</td>
-                                    <td>3</td>
-                                    <td>5</td>
-                                    <td>200 lbs</td>
-                                </tr>
-                                <tr>
-                                    <td>06/06/2025</td>
-                                    <td>Bench Press</td>
-                                    <td>5</td>
-                                    <td>3</td>
-                                    <td>210 lbs</td>
-                                </tr>
-                                <tr>
-                                    <td>06/10/2025</td>
-                                    <td>Bench Press</td>
-                                    <td>3</td>
-                                    <td>10</td>
-                                    <td>165 lbs</td>
-                                </tr>
-                                <tr>
-                                    <td>06/14/2025</td>
-                                    <td>Bench Press</td>
-                                    <td>1</td>
-                                    <td>1</td>
-                                    <td>225 lbs</td>
-                                </tr>
-                                <tr>
-                                    <td>06/18/2025</td>
-                                    <td>Bench Press</td>
-                                    <td>3</td>
-                                    <td>6</td>
-                                    <td>200 lbs</td>
-                                </tr>
-                                <tr>
-                                    <td>06/20/2025</td>
-                                    <td>Bench Press</td>
-                                    <td>2</td>
-                                    <td>4</td>
-                                    <td>175 lbs</td>
-                                </tr>
-                            </tbody> -->
-                        </table>
+                        <div class="table-caption">Most Recent Workout Logs</div>
+                        <div class="table-responsive">
+                            <table class="logged-workouts">
+                                <thead>
+                                    <tr>
+                                        <th>Workout #</th>
+                                        <th>Date</th>
+                                        <th>Exercise</th>
+                                        <th>Sets</th>
+                                        <th>Reps</th>
+                                        <th>Weight</th>
+                                        <th>RIR</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="individual-workouts">
+    
+                                </tbody>
+                                <!-- <tbody>
+                                    <tr>
+                                        <td>06/02/2025</td>
+                                        <td>Bench Press</td>
+                                        <td>3</td>
+                                        <td>5</td>
+                                        <td>200 lbs</td>
+                                    </tr>
+                                    <tr>
+                                        <td>06/06/2025</td>
+                                        <td>Bench Press</td>
+                                        <td>5</td>
+                                        <td>3</td>
+                                        <td>210 lbs</td>
+                                    </tr>
+                                    <tr>
+                                        <td>06/10/2025</td>
+                                        <td>Bench Press</td>
+                                        <td>3</td>
+                                        <td>10</td>
+                                        <td>165 lbs</td>
+                                    </tr>
+                                    <tr>
+                                        <td>06/14/2025</td>
+                                        <td>Bench Press</td>
+                                        <td>1</td>
+                                        <td>1</td>
+                                        <td>225 lbs</td>
+                                    </tr>
+                                    <tr>
+                                        <td>06/18/2025</td>
+                                        <td>Bench Press</td>
+                                        <td>3</td>
+                                        <td>6</td>
+                                        <td>200 lbs</td>
+                                    </tr>
+                                    <tr>
+                                        <td>06/20/2025</td>
+                                        <td>Bench Press</td>
+                                        <td>2</td>
+                                        <td>4</td>
+                                        <td>175 lbs</td>
+                                    </tr>
+                                </tbody> -->
+                            </table>
+                        </div>
 
                     </div>
                     <div class="statistics-card">
@@ -202,17 +179,14 @@
                             <div class="summary-stat">
                                 <img src="assets/trophy.svg" alt="arrow-trending-up" class="arrow-up" width=50 height=50 />
                                 <p class="most-improved-exercise"></p>
-                                <!-- <p class="most-improved-lift">Most improved Lift: <br><br> <span>Deadlift(+30%)</span></p> -->
                             </div>
                             <div class="summary-stat">
                                 <img src="assets/fire.svg" alt="fire-logo" class="fire" width=50 height=50 />
                                 <p class="best-week-streak"></p>
-                                <!-- <p>Best week streak: <br> <br> <span>4</span></p> -->
                             </div>
                             <div class="summary-stat">
                                 <img src="assets/arrow-trending-up.svg" alt="arrow-trending-up" class="arrow-up" width=50 height=50 />
                                 <p class="total-progress-increase"></p>
-                                <!-- <p>Progress increase: <br> <br><span>15%</span></p> -->
                             </div>
                         </div>
                     </div>

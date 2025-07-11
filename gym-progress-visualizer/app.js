@@ -26,6 +26,7 @@ const workoutDate = document.querySelector('#workout-date');
 const workoutTableBody = document.querySelector('.individual-workouts');
 const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
 const errorMessage = document.querySelector('.error-message');
+const deleteErrorMessage = document.querySelector('.delete-error-message');
 const lifts = document.querySelector('.lifts');
 const liftsTwo = document.querySelector('.lifts-two');
 const totalWorkoutsLogged = document.querySelector('.total-workouts');
@@ -46,6 +47,13 @@ function displayError(message) {
     errorMessage.textContent = message;
     setTimeout(() => {
         errorMessage.textContent = '';
+    }, 5000);
+}
+
+function deleteDisplayError(message) {
+    deleteErrorMessage.textContent = message;
+    setTimeout(() => {
+        deleteErrorMessage.textContent = '';
     }, 5000);
 }
 
@@ -108,7 +116,7 @@ function deleteWorkout(e) {
         workoutNumber < 1 ||
         workoutNumber > workouts.length
     ) {
-        displayError("Invalid workout number!");
+        deleteDisplayError("Invalid workout number!");
         return;
     }
 
