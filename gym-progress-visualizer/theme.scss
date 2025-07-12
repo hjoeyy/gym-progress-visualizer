@@ -1,0 +1,18 @@
+$blue-color: #2963a3;
+$lighter-blue-color: #3c76c1;
+$dark-mode-lighter-color: #242424;
+$dark-mode-darker-color: #121212;
+$dark-mode-text-color: #f5f5f5;
+$error-message-red-color: #d32f2f;
+
+
+
+
+:export {
+    blue-color: $blue-color;
+    lighter-blue-color: $lighter-blue-color;
+    dark-mode-lighter-color: $dark-mode-lighter-color;
+    dark-mode-darker-color: $dark-mode-darker-color;
+    dark-mode-text-color: $dark-mode-text-color;
+    $error-message-red-color: $error-message-red-color;
+}
