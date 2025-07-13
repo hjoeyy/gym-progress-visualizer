@@ -43,23 +43,6 @@ for (const [name, element] of Object.entries(elements)) {
     }
 }
 
-
-// const addWorkoutForm = document.querySelector('.workout-form');
-// const workoutDate = document.querySelector('#workout-date');
-// const workoutTableBody = document.querySelector('.individual-workouts');
-// const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
-// const errorMessage = document.querySelector('.error-message');
-// const deleteErrorMessage = document.querySelector('.delete-error-message');
-// const lifts = document.querySelector('.lifts');
-// const liftsTwo = document.querySelector('.lifts-two');
-// const totalWorkoutsLogged = document.querySelector('.total-workouts');
-// const mostImprovedExercise = document.querySelector('.most-improved-exercise');
-// const bestWeekStreak = document.querySelector('.best-week-streak');
-// const totalProgressIncrease = document.querySelector('.total-progress-increase');
-// const deleteWorkoutForm = document.querySelector('.delete-workout-form');
-// const record = document.querySelector('.record');
-
-
 if (localStorage.getItem('darkMode') === 'enabled') {
     document.body.classList.add('dark-mode');
     const modeFooter = document.querySelector('.footer-container');
@@ -79,6 +62,12 @@ function deleteDisplayError(message) {
     setTimeout(() => {
         elements.deleteErrorMessage.textContent = '';
     }, 5000);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function toggleMode() {
@@ -170,13 +159,13 @@ function populateTable(loggedWorkouts = [], workoutsList) {
     workoutsList.innerHTML = recentWorkouts.map((workout, i) => {
         return `
             <tr id="row${i}">
-                <td>${workout.number}</td>
-                <td>${workout.date}</td>
-                <td>${workout.exercise}</td>
-                <td>${workout.sets}</td>
-                <td>${workout.reps}</td>
-                <td>${workout.weight} lbs</td>
-                <td>${workout.RIR}</td>
+                <td>${escapeHtml(workout.number)}</td>
+                <td>${escapeHtml(workout.date)}</td>
+                <td>${escapeHtml(workout.exercise)}</td>
+                <td>${escapeHtml(workout.sets)}</td>
+                <td>${escapeHtml(workout.reps)}</td>
+                <td>${escapeHtml(workout.weight)} lbs</td>
+                <td>${escapeHtml(workout.RIR)}</td>
             </tr>`;
     }).join('');
 }
@@ -512,16 +501,6 @@ function calculatePRForRecordLift(loggedWorkouts = []) {
     return recordLiftLogs;
 }
 
-// function calculateLowestPRForRecordLift(loggedWorkouts = []) {
-//     const recordLiftLogs = calculatePRForRecordLift(loggedWorkouts);
-//     return calculateLowestPersonalRecords(recordLiftLogs);
-// }
-
-// function calculateHighestPRForRecordLift(loggedWorkouts = []) {
-//     const recordLiftLogs = calculatePRForRecordLift(loggedWorkouts);
-//     return calculatePersonalRecords(recordLiftLogs);
-// }
-
 function calculateHighestPRForAllLifts(loggedWorkouts = []) {
     return calculatePersonalRecords(loggedWorkouts);
 }
@@ -605,90 +584,96 @@ function getWeekRange(dateStr) {
 
 // chart
 
+
+
 function renderChart() {
-    if (!elements.workouts.length) return; // dont run chart code at all if no workouts
+    try {
+        if (!elements.workouts.length) return; // dont run chart code at all if no workouts
    
-    const ctx = document.getElementById('myChart');
-    ctx.height = 350;
-
-    const currentDate = new Date();
-    let earliestDate, earliestWeek;
-
-    earliestDate = elements.workouts[0].date;
-    earliestWeek = getStartOfWeek(earliestDate);
-
-    const prData = calculatePRPerExerciseForRecordLift(elements.workouts);
-    const prLogs = calculatePRPerExercise(elements.workouts);
-
-    const colors = [
-        "#2963a3", // blue
-        "#e67e22", // orange
-        "#27ae60", // green
-        "#8e44ad"  // purple
-        ];
-
-    const datasets = Object.entries(prLogs).map(([exercise, prArray], idx) => ({
-        label: exercise,
-        data: prArray.map(pr => ({
-            x: new Date(pr.date),
-            y: pr.oneRM
-        })),
-        backgroundColor: colors[idx % colors.length],
-        borderColor: colors[idx % colors.length],
-        showLine: true,
-        pointRadius: 5,
-        borderWidth: 1
-    }));
-    console.log("Datasets: ", datasets);
-    // Calculate min/max from all workouts, not just PRs
-    const allWorkoutDates = elements.workouts.map(w => parseWorkoutDate(w.date));
-    const minDate = new Date(Math.min(...allWorkoutDates));
-    const maxDate = new Date(Math.max(...allWorkoutDates));
-    const prWeights = prData.map(pr => pr.weight);
-    const minPR = Math.min(...prWeights);
-    const maxPR = Math.max(...prWeights);
-
-    if(myChart) {
-        myChart.destroy();
-    }
-    myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            datasets: datasets
-        },
-        options: {
-            scales: {
-            x: {
-                type: 'time',
-                time: {
-                unit: 'week',
-                tooltipFormat: 'MM/dd/yyyy',
-                displayFormats: {
-                    week: 'MM/dd'
-                }
-                },
-                min: minDate,
-                max: maxDate,
-                title: {
-                display: true,
-                text: 'Date'
-                }
-            },
-            y: {
-                beginAtZero: false,
-                min: Math.floor(minPR / 100) * 100 - 100,
-                max: Math.ceil(maxPR / 100) * 100 + 100,
-                title: {
-                display: true,
-                text: 'PR Weight'
-                },
-                ticks: {
-                    stepSize: 100
-                }
-            }
-            }
+        const ctx = document.getElementById('myChart');
+        ctx.height = 350;
+    
+        const currentDate = new Date();
+        let earliestDate, earliestWeek;
+    
+        earliestDate = elements.workouts[0].date;
+        earliestWeek = getStartOfWeek(earliestDate);
+    
+        const prData = calculatePRPerExerciseForRecordLift(elements.workouts);
+        const prLogs = calculatePRPerExercise(elements.workouts);
+    
+        const colors = [
+            "#2963a3", // blue
+            "#e67e22", // orange
+            "#27ae60", // green
+            "#8e44ad"  // purple
+            ];
+    
+        const datasets = Object.entries(prLogs).map(([exercise, prArray], idx) => ({
+            label: exercise,
+            data: prArray.map(pr => ({
+                x: new Date(pr.date),
+                y: pr.oneRM
+            })),
+            backgroundColor: colors[idx % colors.length],
+            borderColor: colors[idx % colors.length],
+            showLine: true,
+            pointRadius: 5,
+            borderWidth: 1
+        }));
+        console.log("Datasets: ", datasets);
+        // Calculate min/max from all workouts, not just PRs
+        const allWorkoutDates = elements.workouts.map(w => parseWorkoutDate(w.date));
+        const minDate = new Date(Math.min(...allWorkoutDates));
+        const maxDate = new Date(Math.max(...allWorkoutDates));
+        const prWeights = prData.map(pr => pr.weight);
+        const minPR = Math.min(...prWeights);
+        const maxPR = Math.max(...prWeights);
+    
+        if(myChart) {
+            myChart.destroy();
         }
-    });      
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: datasets
+            },
+            options: {
+                scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                    unit: 'week',
+                    tooltipFormat: 'MM/dd/yyyy',
+                    displayFormats: {
+                        week: 'MM/dd'
+                    }
+                    },
+                    min: minDate,
+                    max: maxDate,
+                    title: {
+                    display: true,
+                    text: 'Date'
+                    }
+                },
+                y: {
+                    beginAtZero: false,
+                    min: Math.floor(minPR / 100) * 100 - 100,
+                    max: Math.ceil(maxPR / 100) * 100 + 100,
+                    title: {
+                    display: true,
+                    text: 'PR Weight'
+                    },
+                    ticks: {
+                        stepSize: 100
+                    }
+                }
+                }
+            }
+        });      
+    } catch (error) {
+        console.error('Chart failed to render', error);
+    }
 }
 
 

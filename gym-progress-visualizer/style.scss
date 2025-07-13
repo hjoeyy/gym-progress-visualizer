@@ -44,38 +44,6 @@ $mobile-width: 480px;
 .statistics-cards {
   @include mixins.flex-row($align-items: start, $gap: 20px);
   flex-wrap: wrap;
-
-  .statistics-card {
-    border: 1px solid lightgray;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10%;
-  
-    h3 {
-      font-weight: normal;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-  
-    p {
-      font-weight: bold;
-      font-size: 24px;
-    }
-  
-    li {
-      font-weight: bold;
-      list-style: none;
-      font-size: 24px;
-    }
-
-    .record p {
-      font-size: 16px;
-    }
-
-    span {
-      font-weight: normal;
-    }
-  }
 }
 
 .statistics-card {
@@ -448,7 +416,7 @@ input, .exercises {
 /*# sourceMappingURL=style.scss.map */
 
 .statistics-card.dark-mode-statistics {
-  background-color: $dark-mode-lighter-color !important;
-  color: $dark-mode-text-color !important;
+  background-color: $dark-mode-lighter-color;
+  color: $dark-mode-text-color;
 }
 

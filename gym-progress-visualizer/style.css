@@ -54,32 +54,6 @@
   gap: 20px;
   flex-wrap: wrap;
 }
-.statistics-cards .statistics-card {
-  border: 1px solid lightgray;
-  background-color: white;
-  padding: 20px;
-  border-radius: 10%;
-}
-.statistics-cards .statistics-card h3 {
-  font-weight: normal;
-  text-align: center;
-  margin-bottom: 20px;
-}
-.statistics-cards .statistics-card p {
-  font-weight: bold;
-  font-size: 24px;
-}
-.statistics-cards .statistics-card li {
-  font-weight: bold;
-  list-style: none;
-  font-size: 24px;
-}
-.statistics-cards .statistics-card .record p {
-  font-size: 16px;
-}
-.statistics-cards .statistics-card span {
-  font-weight: normal;
-}
 
 .statistics-card {
   border: 1px solid lightgray;
@@ -427,8 +401,8 @@ input, .exercises {
 
 
 .statistics-card.dark-mode-statistics {
-  background-color: #242424 !important;
-  color: #f5f5f5 !important;
+  background-color: #242424;
+  color: #f5f5f5;
 }
 
 /*# sourceMappingURL=style.css.map */
