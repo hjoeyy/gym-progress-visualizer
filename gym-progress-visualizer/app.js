@@ -20,21 +20,45 @@ function testDate(dateInput) {
     }
 }
 
+const elements = {
+ addWorkoutForm: document.querySelector('.workout-form'),
+ workoutDate: document.querySelector('#workout-date'),
+ workoutTableBody: document.querySelector('.individual-workouts'),
+ workouts: JSON.parse(localStorage.getItem('workouts')) || [],
+ errorMessage: document.querySelector('.error-message'),
+ deleteErrorMessage: document.querySelector('.delete-error-message'),
+ lifts: document.querySelector('.lifts'),
+ liftsTwo: document.querySelector('.lifts-two'),
+ totalWorkoutsLogged: document.querySelector('.total-workouts'),
+ mostImprovedExercise: document.querySelector('.most-improved-exercise'),
+ bestWeekStreak: document.querySelector('.best-week-streak'),
+ totalProgressIncrease: document.querySelector('.total-progress-increase'),
+ deleteWorkoutForm: document.querySelector('.delete-workout-form'),
+ record: document.querySelector('.record')
+};
 
-const addWorkoutForm = document.querySelector('.workout-form');
-const workoutDate = document.querySelector('#workout-date');
-const workoutTableBody = document.querySelector('.individual-workouts');
-const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
-const errorMessage = document.querySelector('.error-message');
-const deleteErrorMessage = document.querySelector('.delete-error-message');
-const lifts = document.querySelector('.lifts');
-const liftsTwo = document.querySelector('.lifts-two');
-const totalWorkoutsLogged = document.querySelector('.total-workouts');
-const mostImprovedExercise = document.querySelector('.most-improved-exercise');
-const bestWeekStreak = document.querySelector('.best-week-streak');
-const totalProgressIncrease = document.querySelector('.total-progress-increase');
-const deleteWorkoutForm = document.querySelector('.delete-workout-form');
-const record = document.querySelector('.record');
+for (const [name, element] of Object.entries(elements)) {
+    if(!element) {
+        console.warn(`${name} not found in the DOM`);
+    }
+}
+
+
+// const addWorkoutForm = document.querySelector('.workout-form');
+// const workoutDate = document.querySelector('#workout-date');
+// const workoutTableBody = document.querySelector('.individual-workouts');
+// const workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+// const errorMessage = document.querySelector('.error-message');
+// const deleteErrorMessage = document.querySelector('.delete-error-message');
+// const lifts = document.querySelector('.lifts');
+// const liftsTwo = document.querySelector('.lifts-two');
+// const totalWorkoutsLogged = document.querySelector('.total-workouts');
+// const mostImprovedExercise = document.querySelector('.most-improved-exercise');
+// const bestWeekStreak = document.querySelector('.best-week-streak');
+// const totalProgressIncrease = document.querySelector('.total-progress-increase');
+// const deleteWorkoutForm = document.querySelector('.delete-workout-form');
+// const record = document.querySelector('.record');
+
 
 if (localStorage.getItem('darkMode') === 'enabled') {
     document.body.classList.add('dark-mode');
@@ -44,16 +68,16 @@ if (localStorage.getItem('darkMode') === 'enabled') {
 }
 
 function displayError(message) {
-    errorMessage.textContent = message;
+    elements.errorMessage.textContent = message;
     setTimeout(() => {
-        errorMessage.textContent = '';
+        elements.errorMessage.textContent = '';
     }, 5000);
 }
 
 function deleteDisplayError(message) {
-    deleteErrorMessage.textContent = message;
+    elements.deleteErrorMessage.textContent = message;
     setTimeout(() => {
-        deleteErrorMessage.textContent = '';
+        elements.deleteErrorMessage.textContent = '';
     }, 5000);
 }
 
@@ -72,7 +96,7 @@ function toggleMode() {
 
 function addWorkout(e) {
     e.preventDefault();
-    const number = workouts.length + 1;
+    const number = elements.workouts.length + 1;
     const date = (this.querySelector('[name=workout-date]')).value;
     const exerciseSelect = this.querySelector('[name=exercise]');
     const exercise = exerciseSelect.options[exerciseSelect.selectedIndex].text;
@@ -91,18 +115,18 @@ function addWorkout(e) {
         RIR
     };
 
-    workouts.push(individualWorkout);
-    reassignWorkoutNumbers(workouts);
-    populateTable(workouts, workoutTableBody);
-    displayPersonalRecords(workouts, lifts);
-    displayWeeklyVolumePerExercise(workouts, liftsTwo);
-    displayTotalWorkouts(workouts, totalWorkoutsLogged);
-    displayMostImprovedLift(workouts, mostImprovedExercise);
-    displayWeekStreak(workouts, bestWeekStreak);
-    displayTotalProgressIncrease(workouts, totalProgressIncrease);
-    displayAllRecords(workouts, record);
+    elements.workouts.push(individualWorkout);
+    reassignWorkoutNumbers(elements.workouts);
+    populateTable(elements.workouts, elements.workoutTableBody);
+    displayPersonalRecords(elements.workouts, elements.lifts);
+    displayWeeklyVolumePerExercise(elements.workouts, elements.liftsTwo);
+    displayTotalWorkouts(elements.workouts, elements.totalWorkoutsLogged);
+    displayMostImprovedLift(elements.workouts, elements.mostImprovedExercise);
+    displayWeekStreak(elements.workouts, elements.bestWeekStreak);
+    displayTotalProgressIncrease(elements.workouts, elements.totalProgressIncrease);
+    displayAllRecords(elements.workouts, elements.record);
     renderChart();
-    localStorage.setItem('workouts', JSON.stringify(workouts));
+    localStorage.setItem('workouts', JSON.stringify(elements.workouts));
     this.reset();
 }
 
@@ -114,24 +138,24 @@ function deleteWorkout(e) {
     if (
         isNaN(workoutNumber) ||
         workoutNumber < 1 ||
-        workoutNumber > workouts.length
+        workoutNumber > elements.workouts.length
     ) {
         deleteDisplayError("Invalid workout number!");
         return;
     }
 
-    workouts.splice(workoutNumber - 1, 1); // because we put the number ahead by 1, index is behind by 1 due to that
-    reassignWorkoutNumbers(workouts);
-    populateTable(workouts, workoutTableBody);
-    displayPersonalRecords(workouts, lifts);
-    displayWeeklyVolumePerExercise(workouts, liftsTwo);
-    displayTotalWorkouts(workouts, totalWorkoutsLogged);
-    displayMostImprovedLift(workouts, mostImprovedExercise);
-    displayWeekStreak(workouts, bestWeekStreak);
-    displayTotalProgressIncrease(workouts, totalProgressIncrease);
-    displayAllRecords(workouts, record);
+    elements.workouts.splice(workoutNumber - 1, 1); // because we put the number ahead by 1, index is behind by 1 due to that
+    reassignWorkoutNumbers(elements.workouts);
+    populateTable(elements.workouts, elements.workoutTableBody);
+    displayPersonalRecords(elements.workouts, elements.lifts);
+    displayWeeklyVolumePerExercise(elements.workouts, elements.liftsTwo);
+    displayTotalWorkouts(elements.workouts, elements.totalWorkoutsLogged);
+    displayMostImprovedLift(elements.workouts, elements.mostImprovedExercise);
+    displayWeekStreak(elements.workouts, elements.bestWeekStreak);
+    displayTotalProgressIncrease(elements.workouts, elements.totalProgressIncrease);
+    displayAllRecords(elements.workouts, elements.record);
     renderChart();
-    localStorage.setItem('workouts', JSON.stringify(workouts));
+    localStorage.setItem('workouts', JSON.stringify(elements.workouts));
     this.reset();
 }
 
@@ -582,7 +606,7 @@ function getWeekRange(dateStr) {
 // chart
 
 function renderChart() {
-    if (!workouts.length) return; // dont run chart code at all if no workouts
+    if (!elements.workouts.length) return; // dont run chart code at all if no workouts
    
     const ctx = document.getElementById('myChart');
     ctx.height = 350;
@@ -590,11 +614,11 @@ function renderChart() {
     const currentDate = new Date();
     let earliestDate, earliestWeek;
 
-    earliestDate = workouts[0].date;
+    earliestDate = elements.workouts[0].date;
     earliestWeek = getStartOfWeek(earliestDate);
 
-    const prData = calculatePRPerExerciseForRecordLift(workouts);
-    const prLogs = calculatePRPerExercise(workouts);
+    const prData = calculatePRPerExerciseForRecordLift(elements.workouts);
+    const prLogs = calculatePRPerExercise(elements.workouts);
 
     const colors = [
         "#2963a3", // blue
@@ -617,7 +641,7 @@ function renderChart() {
     }));
     console.log("Datasets: ", datasets);
     // Calculate min/max from all workouts, not just PRs
-    const allWorkoutDates = workouts.map(w => parseWorkoutDate(w.date));
+    const allWorkoutDates = elements.workouts.map(w => parseWorkoutDate(w.date));
     const minDate = new Date(Math.min(...allWorkoutDates));
     const maxDate = new Date(Math.max(...allWorkoutDates));
     const prWeights = prData.map(pr => pr.weight);
@@ -668,18 +692,23 @@ function renderChart() {
 }
 
 
-addWorkoutForm.addEventListener('submit', addWorkout);
-deleteWorkoutForm.addEventListener('submit', deleteWorkout);
+if (elements.addWorkoutForm) {
+    elements.addWorkoutForm.addEventListener('submit', addWorkout);
+}
+
+if (elements.deleteWorkoutForm) {
+    elements.deleteWorkoutForm.addEventListener('submit', deleteWorkout);
+}
 
 
-populateTable(workouts, workoutTableBody);
-displayPersonalRecords(workouts, lifts);
-displayWeeklyVolumePerExercise(workouts, liftsTwo);
-displayTotalWorkouts(workouts, totalWorkoutsLogged);
-displayMostImprovedLift(workouts, mostImprovedExercise);
-displayWeekStreak(workouts, bestWeekStreak);
-displayTotalProgressIncrease(workouts, totalProgressIncrease);
-displayAllRecords(workouts, record);
+populateTable(elements.workouts, elements.workoutTableBody);
+displayPersonalRecords(elements.workouts, elements.lifts);
+displayWeeklyVolumePerExercise(elements.workouts, elements.liftsTwo);
+displayTotalWorkouts(elements.workouts, elements.totalWorkoutsLogged);
+displayMostImprovedLift(elements.workouts, elements.mostImprovedExercise);
+displayWeekStreak(elements.workouts, elements.bestWeekStreak);
+displayTotalProgressIncrease(elements.workouts, elements.totalProgressIncrease);
+displayAllRecords(elements.workouts, elements.record);
 renderChart();
 
 
