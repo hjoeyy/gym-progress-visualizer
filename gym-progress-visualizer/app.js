@@ -105,6 +105,7 @@ function addWorkout(e) {
     };
 
     elements.workouts.push(individualWorkout);
+    elements.workouts.sort((a, b) => parseWorkoutDate(b.date) - parseWorkoutDate(a.date));
     reassignWorkoutNumbers(elements.workouts);
     populateTable(elements.workouts, elements.workoutTableBody);
     displayPersonalRecords(elements.workouts, elements.lifts);
@@ -134,6 +135,7 @@ function deleteWorkout(e) {
     }
 
     elements.workouts.splice(workoutNumber - 1, 1); // because we put the number ahead by 1, index is behind by 1 due to that
+    elements.workouts.sort((a, b) => parseWorkoutDate(b.date) - parseWorkoutDate(a.date));
     reassignWorkoutNumbers(elements.workouts);
     populateTable(elements.workouts, elements.workoutTableBody);
     displayPersonalRecords(elements.workouts, elements.lifts);
@@ -149,13 +151,14 @@ function deleteWorkout(e) {
 }
 
 function reassignWorkoutNumbers(loggedWorkouts = []) {
-    loggedWorkouts.forEach((workout, idx) => {
-        workout.number = idx + 1; // fixes the array after a change by reassigning everything orderly
-    });
+    // Assign highest number to the most recent (first in array)
+    for (let i = 0; i < loggedWorkouts.length; i++) {
+        loggedWorkouts[i].number = loggedWorkouts.length - i;
+    }
 }
 
 function populateTable(loggedWorkouts = [], workoutsList) {
-    const recentWorkouts = loggedWorkouts.slice(-6);
+    const recentWorkouts = loggedWorkouts.slice(0, 6); // first 6, most recent
     workoutsList.innerHTML = recentWorkouts.map((workout, i) => {
         return `
             <tr id="row${i}">
@@ -398,6 +401,9 @@ function calculateWeekStreak(loggedWorkouts = []) {
         }
         weeklyGroups[weekKey].push(workout);
     });
+
+    // **DEBUG: Print all week start dates with at least one workout**
+    console.log("Weeks with workouts:", Object.keys(weeklyGroups).sort());
 
     let weekStreak = 0;
     const earliestWeek = getStartOfWeek(earliestDate);
