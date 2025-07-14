@@ -1,6 +1,10 @@
 # gym-progress-visualizer
 An app that tracks your progress in the gym and determines if you are losing or gaining strength in the 4 main lifts: Bench Press, Squat, Deadlift, Overhead Press
 
+How to run the code?
+    
+    -Open a live server or local server
+
 There are a number of statistics cards on this application:
 
 -Workouts logged
