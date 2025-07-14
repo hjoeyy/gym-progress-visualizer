@@ -691,6 +691,10 @@ if (elements.deleteWorkoutForm) {
     elements.deleteWorkoutForm.addEventListener('submit', deleteWorkout);
 }
 
+// Always sort and reassign numbers on page load
+elements.workouts.sort((a, b) => parseWorkoutDate(b.date) - parseWorkoutDate(a.date));
+reassignWorkoutNumbers(elements.workouts);
+
 
 populateTable(elements.workouts, elements.workoutTableBody);
 displayPersonalRecords(elements.workouts, elements.lifts);
