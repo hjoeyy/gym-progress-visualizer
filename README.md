@@ -13,7 +13,9 @@ There are a number of statistics cards on this application:
   -The total volume for the most recent week of lifting, this helps track your hypertrophy progress overtime and determines if you are gaining strength or not. This will only display the week
 
 -Add workout
+
   -This is where you will be able to log each individual workout, you are able to do this by entering:
+  
      -The date you performed the workout (can't be in the future obviously) and the date is strict to be in MM/DD/YYYY form with a regular expression, so you can't do M/DD/YYYY or M/DD/YY or MM/DD/YY etc.
      -The exercise you performed out of the 4 options: Bench Press, Squat, Deadlift, Overhead Press
      -The number of sets you performed in the workout
