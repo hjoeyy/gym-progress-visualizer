@@ -594,7 +594,10 @@ function getWeekRange(dateStr) {
 
 function renderChart() {
     try {
-        if (!elements.workouts.length) return; // dont run chart code at all if no workouts
+        if (!elements.workouts.length) {
+            elements.myChart.innerHTML = `<p>No workouts logged yet</p>`;
+            return; // dont run chart code at all if no workouts
+        } 
    
         const ctx = document.getElementById('myChart');
         ctx.height = 350;
