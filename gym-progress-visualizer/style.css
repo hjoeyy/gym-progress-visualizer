@@ -358,6 +358,35 @@ input, .exercises {
 .workout-log-cards .statistics-card .table-responsive table tr:last-child {
   border-bottom: none;
 }
+.delete-button {
+  background-color: #3c76c1;
+  color: white;
+  border: 1px solid #2963a3;
+  height: 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+.delete-button:hover {
+  background-color: #2963a3;
+}
+
+.workout-log-cards .statistics-card .table-responsive .clear-workouts-button {
+  background-color: #3c76c1;
+  color: white;
+  border: 1px solid #2963a3;
+  height: 30px;
+  border-radius: 5px;
+  width: 50%;
+  display: block;
+  margin-left: auto;
+  cursor: pointer;
+  margin-right: auto;
+  margin-top: 10px;
+}
+.workout-log-cards .statistics-card .table-responsive .clear-workouts-button:hover {
+  background-color: #2963a3;
+}
 
 .statistics-card .summary-stats {
   padding: 20px;

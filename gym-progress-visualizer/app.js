@@ -2,15 +2,6 @@ const re = /^(?:\d{2})([/])\d{2}\1\d{4}$/;
 let myChart = null;
 
 function testDate(dateInput) {
-    console.log("date received: ", dateInput);
-    const ok = re.exec(dateInput);
-    console.log("Regex result: ", ok);
-
-    if(!ok) {
-        displayError("Invalid Date Format! Please use MM/DD/YYYY");
-
-        throw new Error("Invalid Date Format! Please use MM/DD/YYYY");
-    }
     const currentDate = new Date();
     const parseDate = parseWorkoutDate(dateInput);
 
@@ -34,7 +25,9 @@ const elements = {
  bestWeekStreak: document.querySelector('.best-week-streak'),
  totalProgressIncrease: document.querySelector('.total-progress-increase'),
  deleteWorkoutForm: document.querySelector('.delete-workout-form'),
- record: document.querySelector('.record')
+ deleteButton: document.querySelector('.delete-button'),
+ record: document.querySelector('.record'),
+ clearWorkoutsButton: document.querySelector('.clear-workouts-button')
 };
 
 for (const [name, element] of Object.entries(elements)) {
@@ -93,6 +86,7 @@ function addWorkout(e) {
     const reps = Number((this.querySelector('[name=workout-reps]')).value);
     const weight = Number((this.querySelector('[name=workout-weight]')).value);
     const RIR = Number((this.querySelector('[name=workout-rir]')).value);
+    const deleteButton = this.querySelector('.delete-button');
     testDate(date);
     const individualWorkout = {
         number,
@@ -169,8 +163,28 @@ function populateTable(loggedWorkouts = [], workoutsList) {
                 <td>${escapeHtml(workout.reps)}</td>
                 <td>${escapeHtml(workout.weight)} lbs</td>
                 <td>${escapeHtml(workout.RIR)}</td>
+                <td><button class="delete-button" data-workout-number="${workout.number}">Delete</button></td>
             </tr>`;
     }).join('');
+}
+
+function clearWorkouts(e) {
+    e.preventDefault();
+    elements.workouts = [];
+    elements.workouts.sort((a, b) => parseWorkoutDate(b.date) - parseWorkoutDate(a.date));
+    reassignWorkoutNumbers(elements.workouts);
+
+    populateTable(elements.workouts, elements.workoutTableBody);
+    displayPersonalRecords(elements.workouts, elements.lifts);
+    displayWeeklyVolumePerExercise(elements.workouts, elements.liftsTwo);
+    displayTotalWorkouts(elements.workouts, elements.totalWorkoutsLogged);
+    displayMostImprovedLift(elements.workouts, elements.mostImprovedExercise);
+    displayWeekStreak(elements.workouts, elements.bestWeekStreak);
+    displayTotalProgressIncrease(elements.workouts, elements.totalProgressIncrease);
+    displayAllRecords(elements.workouts, elements.record);
+    renderChart();
+    localStorage.setItem('workouts', JSON.stringify(elements.workouts));
+    this.reset();
 }
 
 function countWorkouts(loggedWorkouts = []) {
@@ -281,8 +295,7 @@ function getEndOfCurrentMonth(date) {
 }
 
 function parseWorkoutDate(dateStr) {
-    const [month, day, year] = dateStr.split("/").map(Number);
-    return new Date(year, month - 1, day);
+    return new Date(dateStr);
 }
 
 function calculateWeeklyVolumePerExercise(loggedWorkouts = []) {
@@ -690,8 +703,16 @@ if (elements.addWorkoutForm) {
     elements.addWorkoutForm.addEventListener('submit', addWorkout);
 }
 
+if (elements.deleteButton) {
+    elements.deleteButton.addEventListener('click', workouts.splice(workouts.indexOf(workout), 1));
+}
+
 if (elements.deleteWorkoutForm) {
     elements.deleteWorkoutForm.addEventListener('submit', deleteWorkout);
+}
+
+if (elements.clearWorkoutsButton) {
+    elements.clearWorkoutsButton.addEventListener('click', clearWorkouts);
 }
 
 // Always sort and reassign numbers on page load
