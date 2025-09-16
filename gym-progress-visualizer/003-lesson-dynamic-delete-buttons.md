@@ -86,3 +86,4 @@ function deleteWorkoutByNumber(workoutNumber) {
 - Easier to maintain
 
 Try implementing these changes step by step!
+

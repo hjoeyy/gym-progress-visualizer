@@ -57,3 +57,4 @@ parseWorkoutDate("07/15/2025");
 
 ### Key takeaway
 ISO dates (`YYYY-MM-DD`) are unambiguous and sortable as strings. Perfect for storage and processing.
+

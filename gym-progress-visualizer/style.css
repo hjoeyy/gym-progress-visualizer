@@ -367,6 +367,10 @@ input, .exercises {
   cursor: pointer;
   width: 100%;
 }
+
+.individual-workouts {
+  overflow: scroll;
+}
 .delete-button:hover {
   background-color: #2963a3;
 }

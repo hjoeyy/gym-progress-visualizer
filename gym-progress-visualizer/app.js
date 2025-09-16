@@ -152,7 +152,8 @@ function reassignWorkoutNumbers(loggedWorkouts = []) {
 }
 
 function populateTable(loggedWorkouts = [], workoutsList) {
-    const recentWorkouts = loggedWorkouts.slice(0, 6); // first 6, most recent
+    const recentWorkouts = loggedWorkouts;
+    //const recentWorkouts = loggedWorkouts.slice(0, 6); // first 6, most recent
     workoutsList.innerHTML = recentWorkouts.map((workout, i) => {
         return `
             <tr id="row${i}">
@@ -698,6 +699,27 @@ function renderChart() {
     }
 }
 
+function deleteWorkoutByNumber(workoutNumber) { // this is the same as the deleteWorkout function, but it is used for the delete button in the table
+    const workoutIndex = elements.workouts.findIndex(workout => workout.number === workoutNumber);
+    if (workoutIndex === -1) {
+        deleteDisplayError("Workout not found!");
+        return;
+    }
+    elements.workouts.splice(workoutIndex, 1);
+    elements.workouts.sort((a, b) => parseWorkoutDate(b.date) - parseWorkoutDate(a.date));
+    reassignWorkoutNumbers(elements.workouts);
+    populateTable(elements.workouts, elements.workoutTableBody);
+    displayPersonalRecords(elements.workouts, elements.lifts);
+    displayWeeklyVolumePerExercise(elements.workouts, elements.liftsTwo);
+    displayTotalWorkouts(elements.workouts, elements.totalWorkoutsLogged);
+    displayMostImprovedLift(elements.workouts, elements.mostImprovedExercise);
+    displayWeekStreak(elements.workouts, elements.bestWeekStreak);
+    displayTotalProgressIncrease(elements.workouts, elements.totalProgressIncrease);
+    displayAllRecords(elements.workouts, elements.record);
+    renderChart();
+    localStorage.setItem('workouts', JSON.stringify(elements.workouts));
+}
+
 
 if (elements.addWorkoutForm) {
     elements.addWorkoutForm.addEventListener('submit', addWorkout);
@@ -715,6 +737,12 @@ if (elements.clearWorkoutsButton) {
     elements.clearWorkoutsButton.addEventListener('click', clearWorkouts);
 }
 
+elements.workoutTableBody.addEventListener('click', function(e) {
+    if (e.target.classList.contains('delete-button')) {
+        const workoutNumber = parseInt(e.target.getAttribute('data-workout-number'));
+        deleteWorkoutByNumber(workoutNumber);
+    }
+});
 // Always sort and reassign numbers on page load
 elements.workouts.sort((a, b) => parseWorkoutDate(b.date) - parseWorkoutDate(a.date));
 reassignWorkoutNumbers(elements.workouts);
