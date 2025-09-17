@@ -31,7 +31,8 @@ const elements = {
  recordsStart: document.querySelector('#records-start'),
  recordsEnd: document.querySelector('#records-end'),
  recordsApply: document.querySelector('#records-apply'),
- recordsClear: document.querySelector('#records-clear')
+ recordsClear: document.querySelector('#records-clear'),
+ myChart: document.getElementById('myChart')
 };
 
 for (const [name, element] of Object.entries(elements)) {
@@ -39,6 +40,24 @@ for (const [name, element] of Object.entries(elements)) {
         console.warn(`${name} not found in the DOM`);
     }
 }
+
+console.log('Chart element found:', elements.myChart);
+console.log('Chart element type:', typeof elements.myChart);
+
+function testChartRender() {
+    console.log('Testing chart render...');
+    console.log('Source workouts:', elements.workouts.length);
+    console.log('Chart element:', elements.myChart);
+    
+    if (elements.myChart) {
+        elements.myChart.innerHTML = '<p>Chart test - element found!</p>';
+    } else {
+        console.error('Chart element not found!');
+    }
+}
+
+// Call it after your elements are set up
+testChartRender();
 
 if (localStorage.getItem('darkMode') === 'enabled') {
     document.body.classList.add('dark-mode');
@@ -556,7 +575,7 @@ function calculateHighestPRForAllLifts(loggedWorkouts = []) {
 }
 
 function displayRecords(loggedWorkouts = [], workoutsList) {
-    const theRecordWorkout = calculateHighestPRForRecordLift(loggedWorkouts);
+    const theRecordWorkout = calculateHighestPRForAllLifts(loggedWorkouts);
     if (!theRecordWorkout || Object.keys(theRecordWorkout).length === 0) {
         workoutsList.innerHTML = `<p>Record Lift: <br><br><span>No Data yet</span></p>`;
         return;
@@ -692,6 +711,10 @@ function renderChart(sourceWorkouts = elements.workouts) {
     
         const prData = calculatePRPerExerciseForRecordLift(sourceWorkouts);
         const prLogs = calculatePRPerExercise(sourceWorkouts);
+        // Add this right after line 712 in renderChart
+        console.log("Source workouts for PR calculation:", sourceWorkouts.length);
+        const mostImproved = calculateMostImprovedLift(sourceWorkouts);
+        console.log("Most improved lift:", mostImproved);
     
         const colors = [
             "#2963a3", // blue
@@ -717,9 +740,18 @@ function renderChart(sourceWorkouts = elements.workouts) {
         const allWorkoutDates = sourceWorkouts.map(w => parseWorkoutDate(w.date));
         const minDate = new Date(Math.min(...allWorkoutDates));
         const maxDate = new Date(Math.max(...allWorkoutDates));
-        const prWeights = prData.map(pr => pr.weight);
-        const minPR = Math.min(...prWeights);
-        const maxPR = Math.max(...prWeights);
+        console.log("Filtered sourceWorkouts dates:", sourceWorkouts.map(w => w.date));
+        console.log("All workout dates for range:", allWorkoutDates);
+        console.log("Calculated minDate:", minDate);
+        console.log("Calculated maxDate:", maxDate);
+        console.log("Datasets data points:", datasets.map(d => ({label: d.label, count: d.data.length, dates: d.data.map(point => point.x)})));
+        // Get all oneRM values from prLogs (which has the actual data)
+        const allPRWeights = Object.values(prLogs).flat().map(pr => pr.oneRM);
+        const minPR = allPRWeights.length > 0 ? Math.min(...allPRWeights) : 0;
+        const maxPR = allPRWeights.length > 0 ? Math.max(...allPRWeights) : 100;
+        console.log("PR Data: ", prData);
+        console.log("Min Date: ", minDate);
+        console.log("Max Date: ", maxDate);
     
         if(myChart) {
             myChart.destroy();
@@ -749,14 +781,14 @@ function renderChart(sourceWorkouts = elements.workouts) {
                 },
                 y: {
                     beginAtZero: false,
-                    min: Math.floor(minPR / 100) * 100 - 100,
-                    max: Math.ceil(maxPR / 100) * 100 + 100,
+                    min: Math.max(0, minPR - 50),
+                    max: maxPR + 50,
                     title: {
-                    display: true,
-                    text: 'PR Weight'
+                        display: true,
+                        text: 'PR Weight'
                     },
                     ticks: {
-                        stepSize: 100
+                        stepSize: 50
                     }
                 }
                 }

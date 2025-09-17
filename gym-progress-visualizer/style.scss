@@ -390,7 +390,38 @@ input, .exercises {
   }
 }
 
+.delete-button {
+  background-color: $lighter-blue-color;
+  color: white;
+  border: 1px solid $blue-color;
+  height: 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
 
+  &:hover {
+    background-color: $blue-color;
+  }
+}
+
+// Clear all workouts button
+.workout-log-cards .statistics-card .table-responsive .clear-workouts-button {
+  background-color: $lighter-blue-color;
+  color: white;
+  border: 1px solid $blue-color;
+  height: 30px;
+  border-radius: 5px;
+  width: 50%;
+  display: block;
+  margin-left: auto;
+  cursor: pointer;
+  margin-right: auto;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: $blue-color;
+  }
+}
 
 
 
