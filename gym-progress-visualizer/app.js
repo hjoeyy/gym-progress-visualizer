@@ -27,7 +27,11 @@ const elements = {
  deleteWorkoutForm: document.querySelector('.delete-workout-form'),
  deleteButton: document.querySelector('.delete-button'),
  record: document.querySelector('.record'),
- clearWorkoutsButton: document.querySelector('.clear-workouts-button')
+ clearWorkoutsButton: document.querySelector('.clear-workouts-button'),
+ recordsStart: document.querySelector('#records-start'),
+ recordsEnd: document.querySelector('#records-end'),
+ recordsApply: document.querySelector('#records-apply'),
+ recordsClear: document.querySelector('#records-clear')
 };
 
 for (const [name, element] of Object.entries(elements)) {
@@ -167,6 +171,32 @@ function populateTable(loggedWorkouts = [], workoutsList) {
                 <td><button class="delete-button" data-workout-number="${workout.number}">Delete</button></td>
             </tr>`;
     }).join('');
+
+    // Adjust the scroll viewport to show ~6 rows max with vertical scrollbar
+    adjustRecentWorkoutsViewportHeight();
+}
+
+// Dynamically size the table container to approximately N rows (default 6)
+function adjustRecentWorkoutsViewportHeight(rowCount = 6) {
+    try {
+        const container = document.querySelector('.table-responsive');
+        if (!container) return;
+        const table = container.querySelector('.logged-workouts');
+        if (!table || !table.tBodies || !table.tBodies[0]) return;
+
+        const firstBodyRow = table.tBodies[0].rows[0];
+        const header = table.tHead;
+        const headerHeight = header ? header.getBoundingClientRect().height : 40;
+        const rowHeight = firstBodyRow ? firstBodyRow.getBoundingClientRect().height : 40;
+
+        const verticalPadding = 16; // small cushion for container padding/borders
+        const targetHeight = headerHeight + (rowHeight * rowCount) + verticalPadding;
+
+        container.style.maxHeight = `${Math.round(targetHeight)}px`;
+        container.style.overflowY = 'auto';
+    } catch (e) {
+        // fail silently if measurement not available yet
+    }
 }
 
 function clearWorkouts(e) {
@@ -604,11 +634,49 @@ function getWeekRange(dateStr) {
 
 // chart
 
+function getISOOrNull(inputEl) {
+    if (!inputEl) return null;
+    const v = (inputEl.value || '').trim();
+    return v.length ? v : null; // YYYY-MM-DD or null
+}
 
+function isValidRange(startISO, endISO) {
+    if (!startISO || !endISO) return true; // allow half-open ranges for now
+    // Compare as dates using your existing parseWorkoutDate
+    const start = parseWorkoutDate(startISO);
+    const end = parseWorkoutDate(endISO);
+    return start <= end;
+}
 
-function renderChart() {
+function filterWorkoutsByDate(workouts = [], startISO = null, endISO = null) {
+    if (!Array.isArray(workouts) || workouts.length === 0) return [];
+
+    const startDate = startISO ? parseWorkoutDate(startISO) : null;
+    const endDate = endISO ? parseWorkoutDate(endISO) : null;
+
+    return workouts.filter(w => {
+        const d = parseWorkoutDate(w.date);
+        if (startDate && d < startDate) return false;
+        if (endDate && d > endDate) return false;
+        return true;
+    });
+}
+
+function applyRecordsFilter(startISO = null, endISO = null) {
+    // 1) Compute filtered list
+    const filtered = filterWorkoutsByDate(elements.workouts, startISO, endISO);
+
+    // 2) Re-render only the Records-related UI
+    displayRecords(filtered, elements.record);
+    displayAllRecords(filtered, elements.record);
+    
+    // 3) Update chart with the same filtered list (next step makes renderChart accept a list)
+    renderChart(filtered);
+}
+
+function renderChart(sourceWorkouts = elements.workouts) {
     try {
-        if (!elements.workouts.length) {
+        if (!sourceWorkouts.length) {
             elements.myChart.innerHTML = `<p>No workouts logged yet</p>`;
             return; // dont run chart code at all if no workouts
         } 
@@ -619,11 +687,11 @@ function renderChart() {
         const currentDate = new Date();
         let earliestDate, earliestWeek;
     
-        earliestDate = elements.workouts[0].date;
+        earliestDate = sourceWorkouts[0].date;
         earliestWeek = getStartOfWeek(earliestDate);
     
-        const prData = calculatePRPerExerciseForRecordLift(elements.workouts);
-        const prLogs = calculatePRPerExercise(elements.workouts);
+        const prData = calculatePRPerExerciseForRecordLift(sourceWorkouts);
+        const prLogs = calculatePRPerExercise(sourceWorkouts);
     
         const colors = [
             "#2963a3", // blue
@@ -646,7 +714,7 @@ function renderChart() {
         }));
         console.log("Datasets: ", datasets);
         // Calculate min/max from all workouts, not just PRs
-        const allWorkoutDates = elements.workouts.map(w => parseWorkoutDate(w.date));
+        const allWorkoutDates = sourceWorkouts.map(w => parseWorkoutDate(w.date));
         const minDate = new Date(Math.min(...allWorkoutDates));
         const maxDate = new Date(Math.max(...allWorkoutDates));
         const prWeights = prData.map(pr => pr.weight);
@@ -743,6 +811,32 @@ elements.workoutTableBody.addEventListener('click', function(e) {
         deleteWorkoutByNumber(workoutNumber);
     }
 });
+
+if (elements.recordsApply) {
+    elements.recordsApply.addEventListener('click', () => {
+        const startISO = getISOOrNull(elements.recordsStart);
+        const endISO = getISOOrNull(elements.recordsEnd);
+
+        if (!isValidRange(startISO, endISO)) {
+            deleteDisplayError('Start date must be on or before end date.');
+            return;
+        }
+        // For now, just confirm we captured inputs. Next step will filter data.
+        console.log('Apply records filter:', { startISO, endISO });
+
+        applyRecordsFilter(startISO, endISO);
+    });
+}
+
+if (elements.recordsClear) {
+    elements.recordsClear.addEventListener('click', () => {
+        if (elements.recordsStart) elements.recordsStart.value = '';
+        if (elements.recordsEnd) elements.recordsEnd.value = '';
+        applyRecordsFilter(null, null);
+        console.log('Records filter cleared');
+    });
+}
+
 // Always sort and reassign numbers on page load
 elements.workouts.sort((a, b) => parseWorkoutDate(b.date) - parseWorkoutDate(a.date));
 reassignWorkoutNumbers(elements.workouts);

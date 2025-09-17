@@ -35,7 +35,6 @@
   border: 1px solid #2963a3;
   border-radius: 100%;
   padding: 10px;
-  cursor: pointer;
 }
 
 .dark-mode {
@@ -97,6 +96,20 @@
   gap: 20px;
   flex-wrap: wrap;
   padding: 20px 0;
+}
+.workout-cards .workout-cards-stacked {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.workout-cards .workout-changes { /* left column */
+  flex: 1 1 320px;
+  min-width: 280px;
+}
+.workout-cards .records-card { /* right column */
+  flex: 1 1 320px;
+  min-width: 280px;
 }
 .workout-cards .workout-changes {
   display: flex;
@@ -182,6 +195,17 @@
   gap: 0;
   max-width: 500px;
 }
+.workout-cards .workout-changes .records-card .records-filter {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 10px;
+}
+.workout-cards .workout-changes .records-card .records-filter input, .workout-cards .workout-changes .records-card .records-filter button {
+  height: 30px;
+}
 .workout-cards .workout-changes .records-card .records-graph {
   width: 100%;
   height: auto;
@@ -223,13 +247,6 @@
 
 .error-message, .delete-error-message {
   color: #d32f2f;
-  text-align: center;
-  font-weight: bold;
-  padding-top: 5px;
-}
-
-.rir-explanation {
-  color: black;
   text-align: center;
   font-weight: bold;
   padding-top: 5px;
@@ -358,46 +375,13 @@ input, .exercises {
 .workout-log-cards .statistics-card .table-responsive table tr:last-child {
   border-bottom: none;
 }
-.delete-button {
-  background-color: #3c76c1;
-  color: white;
-  border: 1px solid #2963a3;
-  height: 30px;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-}
-
-.individual-workouts {
-  overflow: scroll;
-}
-.delete-button:hover {
-  background-color: #2963a3;
-}
-
-.workout-log-cards .statistics-card .table-responsive .clear-workouts-button {
-  background-color: #3c76c1;
-  color: white;
-  border: 1px solid #2963a3;
-  height: 30px;
-  border-radius: 5px;
-  width: 50%;
-  display: block;
-  margin-left: auto;
-  cursor: pointer;
-  margin-right: auto;
-  margin-top: 10px;
-}
-.workout-log-cards .statistics-card .table-responsive .clear-workouts-button:hover {
-  background-color: #2963a3;
-}
 
 .statistics-card .summary-stats {
   padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: start;
-  align-items: start;
+  align-items: center;
   gap: 20px;
 }
 .statistics-card .summary-stats .summary-stat {

@@ -87,7 +87,7 @@
                                     </form>
                                 </div>
                             </div>
-                            <div class="statistics-card">
+                            <!-- <div class="statistics-card">
                                 <h3>Delete Workout</h3>
                                 <div class="delete-wrap"></div>
                                     <form class="delete-workout-form">
@@ -96,10 +96,16 @@
                                         <div id="deleteErrorMessage" class="delete-error-message"></div>
                                     </form>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="statistics-card records-card">
                             <h3>Records</h3>
+                            <div class="records-filter">
+                                <input type="date" id="records-start" aria-label="Start date" />
+                                <input type="date" id="records-end" aria-label="End date" />
+                                <button type="button" id="records-apply">Apply</button>
+                                <button type="button" id="records-clear">Clear</button>
+                            </div>
                             <p class="record"></p>
                             <div class="records-graph">
                                 <canvas id="myChart"></canvas>
@@ -109,7 +115,7 @@
                 </div>
                 <div class="workout-log-cards">
                     <div class="statistics-card">
-                        <div class="table-caption">Most Recent Workouts</div>
+                        <div class="table-caption">Workouts</div>
                         <div class="table-responsive">
                             <table class="logged-workouts">
                                 <thead>
