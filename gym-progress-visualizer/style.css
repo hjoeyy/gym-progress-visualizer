@@ -206,6 +206,9 @@
 .workout-cards .workout-changes .records-card .records-filter input, .workout-cards .workout-changes .records-card .records-filter button {
   height: 30px;
 }
+.workout-cards .workout-changes .records-card #records-start, .workout-cards .workout-changes .records-card #records-end {
+  color: gray;
+}
 .workout-cards .workout-changes .records-card .records-graph {
   width: 100%;
   height: auto;
@@ -386,6 +389,23 @@ input, .exercises {
   width: 100%;
 }
 .delete-button:hover {
+  background-color: #2963a3;
+}
+
+#records-start, #records-end {
+  color: gray;
+}
+
+#records-apply, #records-clear {
+  background-color: #3c76c1;
+  color: white;
+  border: 1px solid #2963a3;
+  height: 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 20%;
+}
+#records-apply:hover, #records-clear:hover {
   background-color: #2963a3;
 }
 

@@ -176,6 +176,10 @@ function reassignWorkoutNumbers(loggedWorkouts = []) {
 
 function populateTable(loggedWorkouts = [], workoutsList) {
     const recentWorkouts = loggedWorkouts;
+    if (recentWorkouts.length === 0) {
+        workoutsList.innerHTML = `<p>No workouts logged yet, log a workout!</p>`;
+        return;
+    }
     //const recentWorkouts = loggedWorkouts.slice(0, 6); // first 6, most recent
     workoutsList.innerHTML = recentWorkouts.map((workout, i) => {
         return `
@@ -617,8 +621,12 @@ function calculatePRPerExercise(loggedWorkouts = []) {
     const prs = [];
     const groupedWorkouts = storeWorkoutsByGroup(loggedWorkouts);
     const prLogs = {};
+
     Object.entries(groupedWorkouts).forEach(([exercise, array]) => {
-        prLogs[exercise] = array.map(workout => {
+        // filter workouts for this exercise and sort by date
+        const sortedWorkouts = array.sort((a, b) => parseWorkoutDate(a.date) - parseWorkoutDate(b.date));
+
+        prLogs[exercise] = sortedWorkouts.map(workout => {
             const { weight, reps, RIR, date } = workout;
             const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
             return { date, oneRM };
@@ -628,20 +636,33 @@ function calculatePRPerExercise(loggedWorkouts = []) {
 }
 
 function calculatePRPerExerciseForRecordLift(loggedWorkouts = []) {
-    const prs = []; // array to hold multiple PR objects
-    const bestWorkoutPRs = calculatePRForRecordLift(loggedWorkouts);
 
-    bestWorkoutPRs.forEach(workout => {
+    // if no workouts, return an empty array
+    if (loggedWorkouts.length === 0) return [];
+    
+    const mostImproved = calculateMostImprovedLift(loggedWorkouts);
+
+    const exerciseToTrack = mostImproved
+        ? mostImproved.exercise
+        : Object.keys(storeWorkoutsByGroup(loggedWorkouts))[0];
+
+    if (!exerciseToTrack) return [];
+
+    const bestWorkoutPRs = loggedWorkouts.filter(workout =>
+        workout.exercise === exerciseToTrack
+    );
+
+    const prs = []; // array to hold multiple PR objects
+
+    return bestWorkoutPRs.map(workout => {
         const { weight, reps, RIR, date } = workout;
         const oneRM = (reps == 1 && RIR == 0) ? weight : weight * (1 + ((reps + RIR) * 0.0333));
         
-        // Create a new object for each PR and add it to the array
-        prs.push({
+        return {
             weight: oneRM,
             date: date
-        });
+        };
     });
-    return prs;
 }
 
 function getWeekRange(dateStr) {
@@ -682,39 +703,56 @@ function filterWorkoutsByDate(workouts = [], startISO = null, endISO = null) {
 }
 
 function applyRecordsFilter(startISO = null, endISO = null) {
+    console.log("=== APPLYING FILTER ===");
+    console.log("Original workouts count:", elements.workouts.length);
+    console.log("Filter range:", { startISO, endISO });
     // 1) Compute filtered list
     const filtered = filterWorkoutsByDate(elements.workouts, startISO, endISO);
-
+    console.log("Filtered workouts count:", filtered.length);
+    console.log("Filtered workout dates:", filtered.map(w => w.date));
     // 2) Re-render only the Records-related UI
     displayRecords(filtered, elements.record);
     displayAllRecords(filtered, elements.record);
     
     // 3) Update chart with the same filtered list (next step makes renderChart accept a list)
+    console.log("Calling renderChart with filtered data...");
     renderChart(filtered);
 }
 
-function renderChart(sourceWorkouts = elements.workouts) {
+function renderChart(sourceWorkouts) {
+    if (!sourceWorkouts) {
+        sourceWorkouts = elements.workouts;
+    }
     try {
-        if (!sourceWorkouts.length) {
-            elements.myChart.innerHTML = `<p>No workouts logged yet</p>`;
-            return; // dont run chart code at all if no workouts
-        } 
    
         const ctx = document.getElementById('myChart');
         ctx.height = 350;
+
+          // If no workouts, clear the chart and show message
+          if (!sourceWorkouts.length) {
+            if (myChart) {
+                myChart.destroy();
+            }
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: [] },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'No workouts in selected date range'
+                        }
+                    }
+                }
+            });
+            return;
+        }
     
-        const currentDate = new Date();
-        let earliestDate, earliestWeek;
-    
-        earliestDate = sourceWorkouts[0].date;
-        earliestWeek = getStartOfWeek(earliestDate);
-    
-        const prData = calculatePRPerExerciseForRecordLift(sourceWorkouts);
         const prLogs = calculatePRPerExercise(sourceWorkouts);
-        // Add this right after line 712 in renderChart
-        console.log("Source workouts for PR calculation:", sourceWorkouts.length);
-        const mostImproved = calculateMostImprovedLift(sourceWorkouts);
-        console.log("Most improved lift:", mostImproved);
+        console.log("=== CHART DEBUG ===");
+        console.log("sourceWorkouts passed to renderChart:", sourceWorkouts.length);
+        console.log("prLogs keys:", Object.keys(prLogs));
+        console.log("prLogs data:", prLogs);
     
         const colors = [
             "#2963a3", // blue
@@ -735,48 +773,60 @@ function renderChart(sourceWorkouts = elements.workouts) {
             pointRadius: 5,
             borderWidth: 1
         }));
-        console.log("Datasets: ", datasets);
-        // Calculate min/max from all workouts, not just PRs
+
+
+        // If no datasets, show a message
+        if (datasets.length === 0) {
+            if (myChart) {
+                myChart.destroy();
+            }
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: [] },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'No workout data available'
+                        }
+                    }
+                }
+            });
+            return;
+        }
+    
         const allWorkoutDates = sourceWorkouts.map(w => parseWorkoutDate(w.date));
         const minDate = new Date(Math.min(...allWorkoutDates));
         const maxDate = new Date(Math.max(...allWorkoutDates));
-        console.log("Filtered sourceWorkouts dates:", sourceWorkouts.map(w => w.date));
-        console.log("All workout dates for range:", allWorkoutDates);
-        console.log("Calculated minDate:", minDate);
-        console.log("Calculated maxDate:", maxDate);
-        console.log("Datasets data points:", datasets.map(d => ({label: d.label, count: d.data.length, dates: d.data.map(point => point.x)})));
+
         // Get all oneRM values from prLogs (which has the actual data)
         const allPRWeights = Object.values(prLogs).flat().map(pr => pr.oneRM);
         const minPR = allPRWeights.length > 0 ? Math.min(...allPRWeights) : 0;
         const maxPR = allPRWeights.length > 0 ? Math.max(...allPRWeights) : 100;
-        console.log("PR Data: ", prData);
-        console.log("Min Date: ", minDate);
-        console.log("Max Date: ", maxDate);
-    
+        
         if(myChart) {
             myChart.destroy();
         }
+
         myChart = new Chart(ctx, {
             type: 'line',
-            data: {
-                datasets: datasets
-            },
+            data: { datasets: datasets },
             options: {
                 scales: {
                 x: {
                     type: 'time',
                     time: {
-                    unit: 'week',
-                    tooltipFormat: 'MM/dd/yyyy',
-                    displayFormats: {
-                        week: 'MM/dd'
-                    }
+                        unit: 'week',
+                        tooltipFormat: 'MM/dd/yyyy',
+                        displayFormats: {
+                            week: 'MM/dd'
+                        }
                     },
                     min: minDate,
                     max: maxDate,
                     title: {
-                    display: true,
-                    text: 'Date'
+                        display: true,
+                        text: 'Date'
                     }
                 },
                 y: {

@@ -206,6 +206,9 @@ $mobile-width: 480px;
       .records-filter input, .records-filter button {
         height: 30px;
       }
+      #records-start, #records-end {
+        color: gray;
+      }
 
       .records-graph {
         width: 100%;
@@ -398,6 +401,24 @@ input, .exercises {
   border-radius: 5px;
   cursor: pointer;
   width: 100%;
+
+  &:hover {
+    background-color: $blue-color;
+  }
+}
+
+#records-start, #records-end {
+  color: gray;
+}
+
+#records-apply, #records-clear {
+  background-color: $lighter-blue-color;
+  color: white;
+  border: 1px solid $blue-color;
+  height: 30px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 20%;
 
   &:hover {
     background-color: $blue-color;
